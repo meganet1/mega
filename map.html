@@ -34,12 +34,19 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+    <div class="flex h-screen overflow-hidden relative">
+        
+        <!-- SIDEBAR (Bisa disembunyikan di HP, muncul lewat tombol toggle) -->
+        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition duration-200 ease-in-out w-64 bg-white border-r border-gray-200 flex flex-col z-30">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white justify-between">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                    <span class="text-xl font-bold tracking-wider">MEGANET</span>
+                </div>
+                <!-- Tombol Close Sidebar khusus HP -->
+                <button id="closeSidebar" class="md:hidden text-white focus:outline-none">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                 <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
@@ -59,23 +66,37 @@
             </div>
         </aside>
 
+        <!-- OVERLAY UNTUK MENUTUP SIDEBAR SAAT DI KLIK DI LUAR (MOBILE) -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-                <h1 class="text-lg font-semibold text-gray-800">Peta Jaringan FTTH & ODP</h1>
+        <div class="flex-1 flex flex-col overflow-hidden w-full">
+            <header class="h-auto md:h-16 bg-white border-b border-gray-200 flex flex-col md:flex-row items-center justify-between px-4 md:px-6 py-3 md:py-0 z-10 gap-3">
+                <div class="flex items-center justify-between w-full md:w-auto">
+                    <!-- Tombol Menu Hamburger untuk HP -->
+                    <button id="openSidebar" class="md:hidden text-gray-700 focus:outline-none mr-3">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-base md:text-lg font-semibold text-gray-800 truncate">Peta Jaringan FTTH & ODP</h1>
+                    
+                    <!-- Profil ringkas khusus mobile di kanan atas -->
+                    <div class="flex md:hidden items-center space-x-2">
+                        <div class="w-8 h-8 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs">AD</div>
+                    </div>
+                </div>
                 
                 <!-- MENU SEARCH PETA -->
-                <div class="flex items-center space-x-2">
-                    <div class="relative">
+                <div class="w-full md:w-auto flex items-center space-x-2">
+                    <div class="relative w-full md:w-64">
                         <input type="text" id="searchMapInput" placeholder="Cari ODP / Pelanggan..." 
-                            class="w-64 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                            class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
                         <i class="fa-solid fa-search absolute right-3 top-3 text-gray-400"></i>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-3 border-l pl-4 border-gray-200">
+                <div class="hidden md:flex items-center space-x-3 border-l pl-4 border-gray-200">
                     <div class="w-9 h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold">AD</div>
-                    <div class="hidden sm:block text-left">
+                    <div class="text-left">
                         <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
                         <p class="text-xs text-gray-500 mt-1">Administrator</p>
                     </div>
@@ -93,6 +114,21 @@
     <script src="togeojson.js"></script>
 
     <script>
+        // Logika Toggle Sidebar untuk HP
+        const sidebar = document.getElementById('sidebar');
+        const openSidebarBtn = document.getElementById('openSidebar');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        openSidebarBtn.addEventListener('click', toggleSidebar);
+        closeSidebarBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
         // Inisialisasi Peta Leaflet
         const map = L.map('ftthMap').setView([-7.855, 110.232], 14);
 
