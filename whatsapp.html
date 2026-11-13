@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Gateway - MEGANET FTTH MONITORING</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
+                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+            </div>
+            
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+                
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
+                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
+                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
+                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
+                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
+                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-microchip w-5 mr-3"></i> GenieACS</a>
+                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-address-book w-5 mr-3"></i> Data Pelanggan</a>
+                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-tags w-5 mr-3"></i> Paket Internet</a>
+                <!-- MENU WHATSAPP AKTIF -->
+                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-brands fa-whatsapp w-5 mr-3"></i> WhatsApp Gateway</a>
+                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-user-gear w-5 mr-3"></i> Manajemen Teknisi</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
+                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
+                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
+                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
+                <h1 class="text-lg font-semibold text-gray-800">WhatsApp Gateway & Broadcast</h1>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full"><i class="fa-solid fa-circle text-[8px] mr-1"></i> WA Connected</span>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- FORM KIRIM PESAN -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 md:col-span-1 space-y-4">
+                    <h2 class="font-semibold text-gray-800 border-b pb-3"><i class="fa-regular fa-paper-plane mr-2 text-red-600"></i> Kirim Pesan / Tagihan</h2>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nomor WhatsApp Tujuan</label>
+                        <input type="text" placeholder="Contoh: 628123456789" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Isi Pesan</label>
+                        <textarea rows="4" placeholder="Halo, tagihan internet Anda bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                    </div>
+                    <button onclick="alert('Pesan berhasil dikirim!')" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        <i class="fa-brands fa-whatsapp mr-1"></i> Kirim Pesan Sekarang
+                    </button>
+                </div>
+
+                <!-- TABEL RIWAYAT / LOG PENGIRIMAN -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 md:col-span-2 overflow-hidden flex flex-col">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="font-semibold text-gray-800 text-sm">Riwayat Log Pesan Terkirim</h2>
+                    </div>
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="p-4 font-semibold">Waktu</th>
+                                    <th class="p-4 font-semibold">Penerima</th>
+                                    <th class="p-4 font-semibold">Pesan</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-sm">
+                                <tr>
+                                    <td class="p-4 text-xs text-gray-500">2026-11-04 21:00</td>
+                                    <td class="p-4 font-medium text-gray-800">081234567890</td>
+                                    <td class="p-4 text-gray-600 truncate max-w-xs">Halo Budi, tagihan internet Meganet bulan ini sudah terbit...</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Sent</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

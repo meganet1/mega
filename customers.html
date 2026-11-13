@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pelanggan - MEGANET FTTH MONITORING</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR UTAMA -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-30">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
+                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+            </div>
+            
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+                
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
+                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
+                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
+                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
+                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
+                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS</a>
+                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan</a>
+                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet</a>
+                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway</a>
+                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
+                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
+                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
+                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
+                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- TOPBAR -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
+                <h1 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="fa-solid fa-address-book text-indigo-600 mr-2.5"></i> Manajemen Pelanggan
+                </h1>
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200">
+                        <i class="fa-solid fa-user-shield text-red-600 mr-1"></i> Admin Meganet
+                    </span>
+                </div>
+            </header>
+
+            <!-- KONTEN UTAMA -->
+            <main class="p-6 space-y-6">
+                
+                <!-- KARTU STATISTIK ATAS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Total Pelanggan -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Pelanggan</p>
+                            <h3 id="statTotal" class="text-2xl font-extrabold text-gray-900 mt-1">1</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <!-- Aktif -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Aktif</p>
+                            <h3 id="statAktif" class="text-2xl font-extrabold text-green-600 mt-1">1</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <!-- Disuspend -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Disuspend</p>
+                            <h3 id="statSuspend" class="text-2xl font-extrabold text-amber-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-pause"></i>
+                        </div>
+                    </div>
+                    <!-- Nonaktif -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Nonaktif</p>
+                            <h3 id="statNonaktif" class="text-2xl font-extrabold text-red-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION TABEL PELANGGAN -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    
+                    <!-- Header Bar Tabel & Aksi -->
+                    <div class="p-5 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-gray-800 flex items-center">
+                                <i class="fa-solid fa-list text-gray-500 mr-2"></i> Daftar Pelanggan (<span id="countPelanggan">1</span>)
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Kelola data profil, paket internet, dan nomor WhatsApp pelanggan.</p>
+                        </div>
+                        
+                        <div class="flex items-center flex-wrap gap-2">
+                            <button onclick="exportExcel()" class="bg-white hover:bg-gray-50 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-semibold border border-gray-300 shadow-sm flex items-center transition">
+                                <i class="fa-solid fa-file-excel text-emerald-600 mr-1.5"></i> Export Excel
+                            </button>
+                            <button onclick="importExcel()" class="bg-white hover:bg-gray-50 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-semibold border border-gray-300 shadow-sm flex items-center transition">
+                                <i class="fa-solid fa-file-excel text-blue-600 mr-1.5"></i> Import Excel
+                            </button>
+                            <button onclick="openAddCustomerModal()" class="bg-meganet-red hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm flex items-center transition">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Tambah Pelanggan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Search Bar -->
+                    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center flex-wrap gap-2 flex-1">
+                            <div class="relative min-w-[240px] flex-1 sm:flex-none">
+                                <input type="text" id="searchCustomer" placeholder="Cari nama, telepon, tag ONU..." onkeyup="filterCustomers()"
+                                    class="w-full px-3.5 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <i class="fa-solid fa-search absolute right-3 top-3 text-gray-400 text-xs"></i>
+                            </div>
+                            <select id="filterStatus" onchange="filterCustomers()" class="px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none">
+                                <option value="">Semua Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Disuspend">Disuspend</option>
+                                <option value="Nonaktif">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Data Pelanggan -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 uppercase tracking-wider text-[10px]">
+                                    <th class="p-3.5">#</th>
+                                    <th class="p-3.5">Kode / Nama</th>
+                                    <th class="p-3.5">No. WhatsApp</th>
+                                    <th class="p-3.5">Paket Internet</th>
+                                    <th class="p-3.5">Alamat / ODP</th>
+                                    <th class="p-3.5">Status</th>
+                                    <th class="p-3.5 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTableBody" class="divide-y divide-gray-200">
+                                <!-- Data dimasukkan secara dinamis via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH / EDIT PELANGGAN -->
+   <!-- MODAL TAMBAH / EDIT PELANGGAN (VERSI LENGKAP & LIGHT MODE) -->
+<div id="customerModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-gray-200 text-xs max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2 border-b border-gray-100 z-10">
+            <h3 id="modalTitle" class="text-sm font-bold flex items-center"><i class="fa-solid fa-user-plus mr-2 text-red-600"></i> Tambah Pelanggan</h3>
+            <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Baris 1: Nama & Telepon -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">NAMA LENGKAP *</label>
+                    <input type="text" id="inputNama" placeholder="John Doe" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">NO. TELEPON / WA</label>
+                    <input type="text" id="inputWhatsapp" placeholder="08xxx" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+            </div>
+
+            <!-- Baris 2: Email -->
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">EMAIL (UNTUK NOTIFIKASI PAYMENT)</label>
+                <input type="email" id="inputEmail" placeholder="customer@example.com" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <!-- Baris 3: Alamat -->
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">ALAMAT</label>
+                <textarea id="inputAlamat" rows="2" placeholder="Jl. Example..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 resize-vertical"></textarea>
+            </div>
+
+            <!-- Baris 4: Paket Internet & Tag ONU -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">PAKET INTERNET</label>
+                    <select id="inputPaket" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none">
+                        <option value="">-- Pilih Paket --</option>
+                        <option value="Paket 20 Mbps">Paket 20 Mbps</option>
+                        <option value="Paket 50 Mbps">Paket 50 Mbps</option>
+                        <option value="Paket 100 Mbps">Paket 100 Mbps</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">TAG ONU (GENIEACS)</label>
+                    <input type="text" id="inputTagOnu" placeholder="Sama dengan ID pelanggan" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Baris 5: Router Mikrotik & Metode Koneksi -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">ROUTER MIKROTIK</label>
+                    <select id="inputRouter" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none">
+                        <option value="">-- Default (Pengaturan) --</option>
+                        <option value="Router Utama">Router Utama</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">METODE KONEKSI</label>
+                    <select id="inputMetode" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none">
+                        <option value="PPPoE (MikroTik)">PPPoE (MikroTik)</option>
+                        <option value="Static IP">Static IP</option>
+                        <option value="DHCP">DHCP</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Baris 6: PPPoE Username Mode -->
+            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-2">
+                <label class="block text-gray-600 font-semibold">PPPOE USERNAME</label>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="radio" name="pppoeMode" value="mikrotik" checked class="text-red-600">
+                        <span>Pilih dari MikroTik</span>
+                    </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="radio" name="pppoeMode" value="manual" class="text-red-600">
+                        <span>Input Manual</span>
+                    </label>
+                </div>
+                <input type="text" id="inputPppoeUser" placeholder="Pilih / cari dari MikroTik" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none">
+                <p class="text-[10px] text-amber-600">Tidak ada user PPPoE yang tersedia.</p>
+            </div>
+
+            <!-- Baris 7: Profile Isolir & Tanggal Pasang -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">PROFILE ISOLIR / ADDRESS LIST</label>
+                    <select id="inputIsolirProfile" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="isolir">isolir</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">TANGGAL PASANG</label>
+                    <input type="date" id="inputTglPasang" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+            </div>
+
+            <!-- Baris 8: Status & Isolir Otomatis & Tanggal Isolir -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">STATUS</label>
+                    <select id="inputStatus" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Disuspend">Disuspend</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">ISOLIR OTOMATIS</label>
+                    <select id="inputIsolirOtomatis" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">TANGGAL ISOLIR (1-31)</label>
+                    <input type="number" id="inputTglIsolir" min="1" max="31" value="10" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+            </div>
+
+            <!-- Baris 9: Kolektor & OLT & ODP -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">KOLEKTOR PENAGIHAN</label>
+                    <select id="inputKolektor" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="">-- Tanpa Kolektor --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">PERANGKAT OLT</label>
+                    <select id="inputOlt" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="">-- Tanpa OLT --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">ODP</label>
+                    <select id="inputOdp" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                        <option value="">-- Tanpa ODP --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Baris 10: Port PON / ODP -->
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">PORT PON / ODP</label>
+                <input type="text" id="inputPortPon" placeholder="Contoh: PON 1/1, ODP-01" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+            </div>
+
+            <!-- Baris 11: Koordinat (Latitude & Longitude) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">LATITUDE</label>
+                    <input type="text" id="inputLat" placeholder="-7.xxx" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1">LONGITUDE</label>
+                    <div class="relative">
+                        <input type="text" id="inputLng" placeholder="110.xxx" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 pr-9">
+                        <button type="button" onclick="alert('Mengambil titik koordinat peta...')" class="absolute right-2 top-2 text-gray-400 hover:text-red-600"><i class="fa-solid fa-location-crosshairs"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baris 12: Catatan -->
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">CATATAN</label>
+                <textarea id="inputCatatan" rows="2" placeholder="Opsional..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 resize-vertical"></textarea>
+            </div>
+
+            <!-- Tombol Aksi Bawah -->
+            <div class="flex space-x-2 pt-3 border-t border-gray-100">
+                <button onclick="closeCustomerModal()" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Batal</button>
+                <button onclick="saveCustomerData()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow flex items-center justify-center">
+                    <i class="fa-solid fa-check mr-1.5"></i> Simpan Pelanggan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- SCRIPT MANAJEMEN PELANGGAN -->
+    <script>
+        // Data Pelanggan (Persistent dengan LocalStorage & Non-Dummy)
+        let customersList = JSON.parse(localStorage.getItem('meganet_customers_data')) || [
+            { id: 1, code: 'MGT-001', name: 'Budi Santoso', whatsapp: '081234567890', paket: 'Paket 20 Mbps', alamat: 'ODP 16C - BLIMBING', status: 'Aktif' }
+        ];
+
+        function saveToStorage() {
+            localStorage.setItem('meganet_customers_data', JSON.stringify(customersList));
+            updateStatistics();
+        }
+
+        function updateStatistics() {
+            let total = customersList.length;
+            let aktif = customersList.filter(c => c.status === 'Aktif').length;
+            let suspend = customersList.filter(c => c.status === 'Disuspend').length;
+            let nonaktif = customersList.filter(c => c.status === 'Nonaktif').length;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statAktif').innerText = aktif;
+            document.getElementById('statSuspend').innerText = suspend;
+            document.getElementById('statNonaktif').innerText = nonaktif;
+            document.getElementById('countPelanggan').innerText = total;
+        }
+
+        function renderCustomerTable(dataToRender = customersList) {
+            const tbody = document.getElementById('customerTableBody');
+            tbody.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">Belum ada data pelanggan tercatat.</td></tr>`;
+                return;
+            }
+
+            dataToRender.forEach((cust, index) => {
+                let statusBadge = '';
+                if(cust.status === 'Aktif') statusBadge = '<span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-[10px]">Aktif</span>';
+                else if(cust.status === 'Disuspend') statusBadge = '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full font-semibold text-[10px]">Disuspend</span>';
+                else statusBadge = '<span class="px-2.5 py-1 bg-red-100 text-red-700 rounded-full font-semibold text-[10px]">Nonaktif</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3.5 text-gray-500 font-medium">${index + 1}</td>
+                        <td class="p-3.5 font-bold text-gray-900">
+                            <span class="text-blue-600 block">${cust.code}</span>
+                            <span class="text-gray-700">${cust.name}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-600"><i class="fa-brands fa-whatsapp text-green-600 mr-1"></i> ${cust.whatsapp}</td>
+                        <td class="p-3.5 text-gray-600">${cust.paket}</td>
+                        <td class="p-3.5 text-gray-600">${cust.alamat}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="sendWhatsApp('${cust.whatsapp}', '${cust.name}')" class="p-1.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition" title="Kirim Pesan WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+                            <button onclick="editCustomer(${cust.id})" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteCustomer(${cust.id})" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition" title="Hapus Pelanggan"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+       let editingId = null;
+
+function openAddCustomerModal() {
+    editingId = null;
+    document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-user-plus mr-2 text-red-600"></i> Tambah Pelanggan`;
+    document.getElementById('inputNama').value = '';
+    document.getElementById('inputWhatsapp').value = '';
+    document.getElementById('inputEmail').value = '';
+    document.getElementById('inputAlamat').value = '';
+    document.getElementById('inputPaket').value = '';
+    document.getElementById('inputTagOnu').value = '';
+    document.getElementById('inputPppoeUser').value = '';
+    document.getElementById('inputLat').value = '';
+    document.getElementById('inputLng').value = '';
+    document.getElementById('inputCatatan').value = '';
+    document.getElementById('customerModal').classList.remove('hidden');
+}
+
+function editCustomer(id) {
+    editingId = id;
+    const cust = customersList.find(c => c.id === id);
+    if(cust) {
+        document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-user-pen mr-2 text-blue-600"></i> Edit Pelanggan`;
+        document.getElementById('inputNama').value = cust.name || '';
+        document.getElementById('inputWhatsapp').value = cust.whatsapp || '';
+        document.getElementById('inputEmail').value = cust.email || '';
+        document.getElementById('inputAlamat').value = cust.alamat || '';
+        document.getElementById('inputPaket').value = cust.paket || '';
+        document.getElementById('inputStatus').value = cust.status || 'Aktif';
+        document.getElementById('customerModal').classList.remove('hidden');
+    }
+}
+
+function closeCustomerModal() {
+    document.getElementById('customerModal').classList.add('hidden');
+}
+
+function saveCustomerData() {
+    const name = document.getElementById('inputNama').value.trim();
+    const whatsapp = document.getElementById('inputWhatsapp').value.trim();
+    const email = document.getElementById('inputEmail').value.trim();
+    const alamat = document.getElementById('inputAlamat').value.trim();
+    const paket = document.getElementById('inputPaket').value;
+    const status = document.getElementById('inputStatus').value;
+
+    if(!name || !whatsapp) {
+        alert('Nama Lengkap dan No. Telepon / WA wajib diisi!');
+        return;
+    }
+
+    if(editingId !== null) {
+        let index = customersList.findIndex(c => c.id === editingId);
+        if(index !== -1) {
+            customersList[index] = { ...customersList[index], name, whatsapp, email, alamat, paket, status };
+        }
+    } else {
+        customersList.push({
+            id: Date.now(),
+            code: 'MGT-00' + (customersList.length + 1),
+            name,
+            whatsapp,
+            email,
+            paket: paket || 'Paket 20 Mbps',
+            alamat: alamat || 'Area Meganet',
+            status
+        });
+    }
+
+    saveToStorage();
+    renderCustomerTable();
+    closeCustomerModal();
+    alert('Data pelanggan berhasil disimpan permanen!');
+}
+
+        function deleteCustomer(id) {
+            if(confirm('Yakin ingin menghapus data pelanggan ini dari sistem?')) {
+                customersList = customersList.filter(c => c.id !== id);
+                saveToStorage();
+                renderCustomerTable();
+            }
+        }
+
+        function filterCustomers() {
+            const keyword = document.getElementById('searchCustomer').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            let filtered = customersList.filter(cust => {
+                let matchKeyword = cust.name.toLowerCase().includes(keyword) || cust.code.toLowerCase().includes(keyword) || cust.whatsapp.includes(keyword) || cust.alamat.toLowerCase().includes(keyword);
+                let matchStatus = statusFilter === "" || cust.status === statusFilter;
+                return matchKeyword && matchStatus;
+            });
+
+            renderCustomerTable(filtered);
+        }
+
+        function sendWhatsApp(phone, name) {
+            let cleanPhone = phone.startsWith('0') ? '62' + phone.slice(1) : phone;
+            window.open(`https://wa.me/${cleanPhone}?text=Halo%20${encodeURIComponent(name)},%20ini%20dari%20tim%20Meganet%20FTTH.`, '_blank');
+        }
+
+        function exportExcel() {
+            alert('Mengunduh data pelanggan dalam format Excel (.xlsx)...');
+        }
+
+        function importExcel() {
+            alert('Fitur Import Excel Pelanggan dibuka.');
+        }
+
+        // Inisialisasi awal saat halaman dimuat
+        updateStatistics();
+        renderCustomerTable();
+    </script>
+</body>
+</html>

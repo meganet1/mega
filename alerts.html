@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gangguan & Alert - MEGANET FTTH MONITORING</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } } }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
+                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+                <a href="olts.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
+                <a href="onus.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
+                <a href="traffic.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
+                <a href="map.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+                <a href="alerts.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
+                <a href="history.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">v1.0.0-DEMO</span>
+                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
+                <h1 class="text-lg font-semibold text-gray-800">Manajemen Gangguan & Alert Jaringan</h1>
+                <div class="flex items-center space-x-3 border-l pl-4 border-gray-200">
+                    <div class="w-9 h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold">AD</div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
+                        <p class="text-xs text-gray-500 mt-1">Administrator</p>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h2 class="text-base font-bold text-gray-800">Daftar Gangguan Aktif (3)</h2>
+                        <span class="text-xs bg-red-100 text-red-700 font-semibold px-2.5 py-1 rounded-full">Critical Alerts</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="py-3 px-6">Waktu Kejadian</th>
+                                    <th class="py-3 px-6">Perangkat / Pelanggan</th>
+                                    <th class="py-3 px-6">Jenis Gangguan</th>
+                                    <th class="py-3 px-6">Teknisi Bertugas</th>
+                                    <th class="py-3 px-6">Status</th>
+                                    <th class="py-3 px-6">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-6 text-gray-500">2026-11-04 20:15</td>
+                                    <td class="py-3 px-6 font-medium">Budi Santoso (ONU-HSGQ-0142)</td>
+                                    <td class="py-3 px-6 text-red-600 font-semibold">LOS (Loss of Signal)</td>
+                                    <td class="py-3 px-6">Joko (Teknisi Area 1)</td>
+                                    <td class="py-3 px-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">Active</span></td>
+                                    <td class="py-3 px-6"><button class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700">Proses</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-6 text-gray-500">2026-11-04 19:40</td>
+                                    <td class="py-3 px-6 font-medium">PT Maju Jaya (ONU-CDATA-089)</td>
+                                    <td class="py-3 px-6 text-red-600 font-semibold">ONU Offline</td>
+                                    <td class="py-3 px-6">Andi (Teknisi Area 2)</td>
+                                    <td class="py-3 px-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">Acknowledged</span></td>
+                                    <td class="py-3 px-6"><button class="px-3 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700">Selesaikan</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
