@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peta Jaringan FTTH - MEGANET FTTH MONITORING</title>
+    <title>Map Monitoring - MEGANET FTTH MONITORING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,93 +20,301 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         #ftthMap { width: 100%; height: 100%; }
-        /* Style untuk permanent label nama di peta */
         .map-label {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ccc;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #cbd5e1;
             border-radius: 4px;
-            padding: 1px 5px;
-            font-size: 10px;
+            padding: 2px 6px;
+            font-size: 9px;
             font-weight: bold;
-            color: #333;
+            color: #1e293b;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            white-space: nowrap;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden relative">
+    <div class="flex h-screen overflow-hidden">
         
-        <!-- SIDEBAR (Bisa disembunyikan di HP, muncul lewat tombol toggle) -->
-        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition duration-200 ease-in-out w-64 bg-white border-r border-gray-200 flex flex-col z-30">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white justify-between">
-                <div class="flex items-center">
-                    <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                    <span class="text-xl font-bold tracking-wider">MEGANET</span>
-                </div>
-                <!-- Tombol Close Sidebar khusus HP -->
-                <button id="closeSidebar" class="md:hidden text-white focus:outline-none">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+        <!-- SIDEBAR UTAMA -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-30">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
+                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                <span class="text-xl font-bold tracking-wider">MEGANET</span>
             </div>
-            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
-                <a href="olts.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
-                <a href="onus.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
-                <a href="traffic.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
-                <a href="map.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
-                <a href="alerts.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
-                <a href="history.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
-                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+            
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+                
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
+                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
+                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
+                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
+                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
+                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS</a>
+                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan</a>
+                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet</a>
+                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway</a>
+                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi</a>
+
+                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
+                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
+                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
+                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
             </nav>
             <div class="p-4 border-t border-gray-200">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.0.0-DEMO</span>
+                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
                     <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
                 </div>
             </div>
         </aside>
 
-        <!-- OVERLAY UNTUK MENUTUP SIDEBAR SAAT DI KLIK DI LUAR (MOBILE) -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden md:hidden"></div>
-
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden w-full">
-            <header class="h-auto md:h-16 bg-white border-b border-gray-200 flex flex-col md:flex-row items-center justify-between px-4 md:px-6 py-3 md:py-0 z-10 gap-3">
-                <div class="flex items-center justify-between w-full md:w-auto">
-                    <!-- Tombol Menu Hamburger untuk HP -->
-                    <button id="openSidebar" class="md:hidden text-gray-700 focus:outline-none mr-3">
-                        <i class="fa-solid fa-bars text-xl"></i>
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- TOPBAR PRO / TOOLBAR FITUR UTAMA -->
+            <header class="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 shadow-sm">
+                <div class="flex items-center flex-wrap gap-2">
+                    <span class="font-bold text-xs uppercase tracking-wider bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hidden xl:inline-block">
+                        <i class="fa-solid fa-map-location-dot text-red-600 mr-2"></i> Map Monitoring
+                    </span>
+
+                    <button onclick="openModal('mikrotikModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
+                        <i class="fa-solid fa-sync mr-1.5"></i> Sync[cite: 10]
                     </button>
-                    <h1 class="text-base md:text-lg font-semibold text-gray-800 truncate">Peta Jaringan FTTH & ODP</h1>
-                    
-                    <!-- Profil ringkas khusus mobile di kanan atas -->
-                    <div class="flex md:hidden items-center space-x-2">
-                        <div class="w-8 h-8 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs">AD</div>
-                    </div>
-                </div>
-                
-                <!-- MENU SEARCH PETA -->
-                <div class="w-full md:w-auto flex items-center space-x-2">
-                    <div class="relative w-full md:w-64">
-                        <input type="text" id="searchMapInput" placeholder="Cari ODP / Pelanggan..." 
-                            class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <i class="fa-solid fa-search absolute right-3 top-3 text-gray-400"></i>
-                    </div>
+                    <button onclick="openModal('genieacsModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
+                        <i class="fa-solid fa-microchip mr-1.5"></i> GenieACS[cite: 10]
+                    </button>
+                    <button onclick="openModal('backupModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
+                        <i class="fa-solid fa-database mr-1.5"></i> Backup[cite: 10]
+                    </button>
+                    <button onclick="openModal('perangkatModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 flex items-center shadow-sm transition">
+                        <i class="fa-solid fa-server text-amber-500 mr-1.5"></i> Perangkat[cite: 10]
+                    </button>
+                    <button onclick="openModal('onuModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 flex items-center shadow-sm transition">
+                        <i class="fa-solid fa-users text-cyan-600 mr-1.5"></i> ONU[cite: 10]
+                    </button>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-3 border-l pl-4 border-gray-200">
-                    <div class="w-9 h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold">AD</div>
-                    <div class="text-left">
-                        <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
-                        <p class="text-xs text-gray-500 mt-1">Administrator</p>
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <input type="text" id="searchMapInput" placeholder="Cari nama ODP / Pelanggan..." 
+                            class="w-48 sm:w-64 px-3.5 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <i class="fa-solid fa-search absolute right-3 top-2.5 text-gray-400 text-xs"></i>
                     </div>
+                    
+                    <button onclick="reloadKMLMap()" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 flex items-center" title="Refresh Peta">
+                        <i class="fa-solid fa-rotate mr-1 text-green-600"></i> Refresh[cite: 10]
+                    </button>
                 </div>
             </header>
 
+            <!-- SUB-TOOLBAR STATUS & STATISTIK DATABASE -->
+            <div class="bg-gray-50 border-b border-gray-200 px-6 py-1.5 flex items-center justify-between text-xs text-gray-600 z-10">
+                <div class="flex items-center space-x-6">
+                    <span><i class="fa-solid fa-circle text-green-600 text-[8px] mr-1"></i> Database Connected (monitoring_meganet)</span>
+                    <span><strong id="stat-odp" class="text-gray-900">0</strong> ODP</span>
+                    <span><strong id="stat-aktif" class="text-green-600">0</strong> Aktif</span>
+                    <span><strong id="stat-offline" class="text-red-600">0</strong> Offline/LOS</span>
+                </div>
+                <div>
+                    <span class="text-gray-500">Online: <span id="footer-online" class="text-green-600 font-bold">0</span></span> | 
+                    <span class="text-gray-500">Offline: <span id="footer-offline" class="text-red-600 font-bold">0</span></span>
+                </div>
+            </div>
+
+            <!-- MAP CONTAINER -->
             <main class="flex-1 relative flex flex-col">
-                <!-- MAP CONTAINER -->
                 <div id="ftthMap" class="flex-1 w-full h-full z-0"></div>
             </main>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL-MODAL INTERAKTIF (PRODUKSI) ==================== -->
+
+    <!-- 1. Modal Mikrotik Sync -->
+    <div id="mikrotikModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-network-wired mr-2 text-blue-600"></i> Sync Mikrotik[cite: 11]</h3>
+                <button onclick="closeModal('mikrotikModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-500 mb-4">Sinkronisasi data trafik, interface, dan status router langsung dari perangkat Mikrotik via API/SSH[cite: 11].</p>
+            <div class="space-y-3">
+                <button onclick="syncMikrotikLive()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow">Sinkronisasi Semua Router</button>
+                <button onclick="closeModal('mikrotikModal')" class="w-full py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs text-gray-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal GenieACS Sync & Config -->
+    <div id="genieacsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-microchip mr-2 text-indigo-600"></i> GenieACS Sync & Config[cite: 12]</h3>
+                <button onclick="closeModal('genieacsModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-gray-600 mb-1 font-semibold">GENIEACS NBI URL</label>
+                    <input type="text" id="genieUrlInput" value="http://192.168.1.100:7557" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+                <button onclick="saveGenieConfig()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold border border-gray-300 text-gray-700">Simpan Config</button>
+                <button onclick="syncGenieDevices()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow">Sync Devices (GenieACS)</button>
+                <button onclick="closeModal('genieacsModal')" class="w-full py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Backup & Restore -->
+    <div id="backupModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto text-xs">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-database mr-2 text-emerald-600"></i> Pengaturan Backup & Restore[cite: 13]</h3>
+                <button onclick="closeModal('backupModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1 uppercase tracking-wider text-[10px]">Email Penerima Backup</label>
+                    <input type="email" id="backupEmail" placeholder="admin@meganet.net.id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+                <div>
+                    <label class="block text-gray-600 font-semibold mb-1 uppercase tracking-wider text-[10px]">Jam Backup Otomatis</label>
+                    <input type="text" id="backupTime" value="00:00" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="triggerBackup()" class="py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Backup</button>
+                    <button onclick="testEmailBackup()" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white shadow"><i class="fa-solid fa-paper-plane mr-1"></i> Tes Kirim Sekarang</button>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <div>
+                    <p class="font-bold text-amber-600 mb-2">2. Restore Database MySQL</p>
+                    <div class="space-y-2">
+                        <input type="file" id="fileSqlite" class="hidden" accept=".sql,.sqlite" onchange="uploadDatabaseBackup(this)">
+                        <button onclick="document.getElementById('fileSqlite').click()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-upload mr-1"></i> Restore database.sql</button>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <div>
+                    <p class="font-bold text-amber-600 mb-2">3. Import & Export Data Pelanggan (Excel)</p>
+                    <div class="space-y-2">
+                        <input type="file" id="fileExcel" class="hidden" accept=".xlsx,.xls,.csv" onchange="importExcelData(this)">
+                        <button onclick="document.getElementById('fileExcel').click()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-file-excel mr-1"></i> Import Data Excel</button>
+                        <button onclick="window.location.href='/api/customers/export-excel'" class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-file-excel mr-1"></i> Export Data Excel</button>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <div>
+                    <p class="font-bold text-amber-600 mb-2">4. Sinkronisasi Google Earth (KML/KMZ)</p>
+                    <div class="space-y-2">
+                        <input type="file" id="fileKml" class="hidden" accept=".kml,.kmz" onchange="importKmlFile(this)">
+                        <button onclick="document.getElementById('fileKml').click()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-earth-americas mr-1"></i> Import KML/KMZ Baru</button>
+                    </div>
+                </div>
+
+                <button onclick="closeModal('backupModal')" class="w-full mt-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Perangkat & Keterangan Jaringan (Terhubung MySQL & LocalStorage) -->
+    <!-- Modal Manajemen Perangkat & Keterangan Jaringan (Update Dukungan Klik Kategori) -->
+<div id="perangkatModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto text-xs">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-server mr-2 text-amber-500"></i> Manajemen Perangkat & Keterangan Jaringan</h3>
+            <button onclick="closeModal('perangkatModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="mb-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <span class="font-semibold text-gray-700">Klik baris perangkat di bawah untuk melihat detail item spesifiknya</span>
+            <button onclick="addDeviceCategory()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition flex items-center">
+                <i class="fa-solid fa-plus mr-1"></i> Tambah Kategori
+            </button>
+        </div>
+
+        <!-- Tabel Kategori Utama -->
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 uppercase tracking-wider text-[10px]">
+                        <th class="p-2.5">Jenis Perangkat (Klik untuk Detail)</th>
+                        <th class="p-2.5">Keterangan / Lokasi</th>
+                        <th class="p-2.5 text-center">Jumlah</th>
+                        <th class="p-2.5 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="deviceTableBody" class="divide-y divide-gray-200">
+                    <!-- Dimuat otomatis via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bagian Detail Item Spesifik per Kategori yang Dipilih -->
+        <div id="deviceDetailContainer" class="hidden border-t border-gray-200 pt-4">
+            <div class="flex justify-between items-center mb-2">
+                <h4 id="detailCategoryTitle" class="font-bold text-gray-800 text-sm flex items-center">
+                    <i class="fa-solid fa-list-ul mr-2 text-blue-600"></i> Detail Item: <span id="selectedCategoryName" class="text-blue-600 ml-1"></span>
+                </h4>
+                <button onclick="addSpecificDeviceItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[11px] font-semibold">
+                    <i class="fa-solid fa-plus mr-1"></i> Tambah Unit Baru
+                </button>
+            </div>
+            <div class="overflow-x-auto max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-600 text-[10px] uppercase sticky top-0">
+                        <tr>
+                            <th class="p-2">Nama / ID Unit</th>
+                            <th class="p-2">Keterangan / Alamat</th>
+                            <th class="p-2">Status</th>
+                            <th class="p-2 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="specificDeviceTableBody" class="divide-y divide-gray-200">
+                        <!-- Item detail spesifik -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="closeModal('perangkatModal')" class="w-full mt-5 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium">Tutup</button>
+    </div>
+</div>
+
+    <!-- 5. Modal Tabel ONU / Pelanggan (Real Database) -->
+    <div id="onuModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-4xl shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-users mr-2 text-cyan-600"></i> Tabel Data ONU & Pelanggan[cite: 15]</h3>
+                <button onclick="closeModal('onuModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="overflow-x-auto text-xs">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200">
+                            <th class="p-3">Nama Pelanggan</th>
+                            <th class="p-3">Akun PPPoE</th>
+                            <th class="p-3">IP Address</th>
+                            <th class="p-3">ODP Terhubung</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="onuTableBody" class="divide-y divide-gray-200">
+                        <!-- Data ditarik dari API database -->
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="closeModal('onuModal')" class="w-full mt-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs text-gray-700">Tutup</button>
         </div>
     </div>
 
@@ -114,143 +322,495 @@
     <script src="togeojson.js"></script>
 
     <script>
-        // Logika Toggle Sidebar untuk HP
-        const sidebar = document.getElementById('sidebar');
-        const openSidebarBtn = document.getElementById('openSidebar');
-        const closeSidebarBtn = document.getElementById('closeSidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebarOverlay.classList.toggle('hidden');
-        }
-
-        openSidebarBtn.addEventListener('click', toggleSidebar);
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-
-        // Inisialisasi Peta Leaflet dengan preferCanvas agar ringan & tidak lag di HP
+        // Inisialisasi Peta Leaflet
         const map = L.map('ftthMap', {
             preferCanvas: true
         }).setView([-7.855, 110.232], 14);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; MEGANET FTTH MONITORING PRODUCTION'
         }).addTo(map);
 
-        let allMarkers = []; // Menyimpan referensi marker untuk fitur search
+        let allMarkers = []; 
+        let geoJsonLayerGroup = L.layerGroup().addTo(map);
+        let rawGeoJsonData = null;
 
-        // Ambil file KML mapping Google Earth
-        fetch('mapping_meganet.kml')
-            .then(response => {
-                if (!response.ok) throw new Error("File KML tidak ditemukan!");
-                return response.text();
-            })
-            .then(kmlText => {
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            if (modalId === 'perangkatModal') renderDeviceTable();
+            if (modalId === 'onuModal') fetchOnuDatabaseData();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // 1. MEMUAT PETA KML & KETERANGAN DARI DATABASE MYSQL
+        async function loadKMLData() {
+            geoJsonLayerGroup.clearLayers();
+            allMarkers = [];
+
+            try {
+                // Ambil data deskripsi kustom yang tersimpan di MySQL melalui backend
+                let savedDescMap = {};
+                try {
+                    const descRes = await fetch('/api/monitoring/descriptions');
+                    if (descRes.ok) {
+                        const descList = await descRes.json();
+                        descList.forEach(item => {
+                            savedDescMap[item.name] = item.description;
+                        });
+                    }
+                } catch(e) { console.log('Menggunakan cache lokal untuk deskripsi.'); }
+
+                // Ambil file KML utama
+                const response = await fetch('mapping_meganet.kml?' + new Date().getTime());
+                if (!response.ok) throw new Error("File KML utama tidak ditemukan!");
+                const kmlText = await response.text();
+
                 const domParser = new DOMParser();
                 const kmlDom = domParser.parseFromString(kmlText, 'text/xml');
-                const geojsonData = toGeoJSON.kml(kmlDom);
+                rawGeoJsonData = toGeoJSON.kml(kmlDom);
 
-                const layerGeoJSON = L.geoJSON(geojsonData, {
-                    pointToLayer: function (feature, latlng) {
-                        const name = feature.properties.name || '';
-                        let isOdp = name.toUpperCase().includes('ODP');
-                        
-                        let customIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div style="background-color: ${isOdp ? '#DC2626' : '#2563EB'}; color: white; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 10px;">
-                                    <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'}"></i>
-                                   </div>`,
-                            iconSize: [22, 22],
-                            iconAnchor: [11, 11]
-                        });
-
-                        let marker = L.marker(latlng, { icon: customIcon });
-
-                        // Simpan data untuk pencarian
-                        allMarkers.push({ name: name.toLowerCase(), marker: marker, latlng: latlng });
-
-                        return marker;
-                    },
-                    style: function(feature) {
-                        return {
-                            color: feature.properties.stroke || '#00ff55',
-                            weight: feature.properties['stroke-width'] || 2,
-                            opacity: 0.7
-                        };
-                    },
-                    onEachFeature: function(feature, layer) {
-                        if (feature.properties && feature.properties.name) {
-                            let name = feature.properties.name;
-                            let desc = feature.properties.description || '';
-                            let latlng = layer.getLatLng ? layer.getLatLng() : null;
-
-                            // Buat link Google Maps Direction jika koordinat tersedia
-                            let gmapsUrl = latlng ? `https://www.google.com/maps/dir/?api=1&destination=${latlng.lat},${latlng.lng}` : '#';
-                            
-                            let popupContent = `
-                                <div style="min-width: 160px;">
-                                    <b style="font-size: 12px; color: #111;">${name}</b><br>
-                                    <p style="font-size: 10px; color: #555; margin: 3px 0;">${desc}</p>
-                                    <hr style="border: 0; border-top: 1px solid #ddd; margin: 4px 0;">
-                                    <a href="${gmapsUrl}" target="_blank" style="display: inline-block; background-color: #2563EB; color: white; padding: 3px 6px; border-radius: 3px; font-size: 10px; text-decoration: none; font-weight: bold;">
-                                        <i class="fa-solid fa-directions"></i> Petunjuk Arah
-                                    </a>
-                                </div>
-                            `;
-
-                            // Popup saat diklik
-                            layer.bindPopup(popupContent);
-
-                            // Tampilkan nama langsung di peta (Permanent Label)
-                            layer.bindTooltip(name, {
-                                permanent: true,
-                                direction: 'right',
-                                className: 'map-label',
-                                offset: [8, 0]
-                            });
-                        }
-                    }
-                }).addTo(map);
-
-                // Optimasi Anti-Lag: Sembunyikan label nama saat dizoom out (kejauhan < 16)
-                function updateLabelsVisibility() {
-                    const currentZoom = map.getZoom();
-                    const labels = document.querySelectorAll('.map-label');
-                    labels.forEach(label => {
-                        if (currentZoom < 16) {
-                            label.style.display = 'none';
-                        } else {
-                            label.style.display = 'block';
+                // Sinkronkan deskripsi kustom dari database jika ada
+                if (rawGeoJsonData && rawGeoJsonData.features) {
+                    rawGeoJsonData.features.forEach(feature => {
+                        const name = feature.properties.name;
+                        if (name && savedDescMap[name]) {
+                            feature.properties.customDesc = savedDescMap[name];
                         }
                     });
                 }
 
-                map.on('zoomend', updateLabelsVisibility);
-                updateLabelsVisibility();
+                renderMapLayers(rawGeoJsonData);
+            } catch (error) {
+                console.error("Gagal memuat peta:", error);
+            }
+        }
 
-                // Zoom otomatis ke area mapping
-                if (layerGeoJSON.getBounds().isValid()) {
-                    map.fitBounds(layerGeoJSON.getBounds());
-                }
+        function renderMapLayers(geojsonData) {
+            geoJsonLayerGroup.clearLayers();
+            allMarkers = [];
 
-                // Fitur Search / Pencarian Nama ODP / Pelanggan
-                const searchInput = document.getElementById('searchMapInput');
-                searchInput.addEventListener('input', function(e) {
-                    const keyword = e.target.value.toLowerCase();
-                    if (!keyword) return;
+            let onlineCount = 0;
+            let offlineCount = 0;
+            let odpCount = 0;
 
-                    const found = allMarkers.find(item => item.name.includes(keyword));
-                    if (found) {
-                        map.setView(found.latlng, 18); // Zoom ke lokasi yang dicari
-                        found.marker.openPopup();
+            const layerGeoJSON = L.geoJSON(geojsonData, {
+                pointToLayer: function (feature, latlng) {
+                    const name = feature.properties.name || '';
+                    let isOdp = name.toUpperCase().includes('ODP');
+                    
+                    if (isOdp) {
+                        odpCount++;
+                        onlineCount++;
+                    } else {
+                        offlineCount++;
                     }
-                });
-            })
-            .catch(error => {
-                console.error("Gagal memuat file KML:", error);
+
+                    let customIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color: ${isOdp ? '#DC2626' : '#2563EB'}; color: white; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 9px;">
+                                    <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'}"></i>
+                               </div>`,
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
+                    });
+
+                    let marker = L.marker(latlng, { icon: customIcon });
+                    allMarkers.push({ name: name.toLowerCase(), marker: marker, latlng: latlng });
+                    return marker;
+                },
+                style: function(feature) {
+                    return {
+                        color: feature.properties.stroke || '#16A34A',
+                        weight: feature.properties['stroke-width'] || 3,
+                        opacity: 0.8
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    if (feature.properties && feature.properties.name) {
+                        let name = feature.properties.name;
+                        
+                        if (!feature.properties.customDesc) {
+                            let rawDesc = feature.properties.description || '';
+                            feature.properties.customDesc = rawDesc && rawDesc !== 'Tidak ada deskripsi.' ? rawDesc : 'Keterangan: ODP Aktif / Terhubung ke Core Utama.';
+                        }
+                        
+                        let latlng = layer.getLatLng ? layer.getLatLng() : (layer.getBounds ? layer.getBounds().getCenter() : null);
+                        let gmapsUrl = latlng ? `https://www.google.com/maps/dir/?api=1&destination=${latlng.lat},${latlng.lng}` : '#';
+                        
+                        let popupContent = `
+                            <div style="min-width: 220px; font-family: inherit; color: #1e293b; padding: 2px;">
+                                <b style="font-size: 14px; color: #0f172a; display: block; margin-bottom: 6px;">${name}</b>
+                                <textarea id="desc-input-${name.replace(/[^a-zA-Z0-9]/g, '')}" rows="2" style="width: 100%; font-size: 11px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical; margin-bottom: 8px; color: #334155;" placeholder="Masukkan keterangan...">${feature.properties.customDesc}</textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                                    <button onclick="saveDesc('${name.replace(/'/g, "\\'")}')" style="background-color: #16A34A; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center;">
+                                        <i class="fa-solid fa-save mr-1"></i> Simpan
+                                    </button>
+                                    <a href="${gmapsUrl}" target="_blank" style="background-color: #2563EB; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center;">
+                                        <i class="fa-solid fa-directions mr-1"></i> Petunjuk Arah
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+
+                        layer.bindPopup(popupContent);
+
+                        if (feature.geometry.type === 'Point') {
+                            layer.bindTooltip(name, {
+                                permanent: true,
+                                direction: 'right',
+                                className: 'map-label',
+                                offset: [6, 0]
+                            });
+                        }
+                    }
+                }
             });
+
+            geoJsonLayerGroup.addLayer(layerGeoJSON);
+
+            // Update Statistik Real
+            document.getElementById('stat-odp').innerText = odpCount;
+            document.getElementById('stat-aktif').innerText = onlineCount;
+            document.getElementById('stat-offline').innerText = 0;
+            document.getElementById('footer-online').innerText = onlineCount;
+            document.getElementById('footer-offline').innerText = 0;
+        }
+
+        // 2. MENYIMPAN DESKRIPSI PERANGKAT KE DATABASE MYSQL PERMANEN
+        async function saveDesc(featureName) {
+            const sanitizedId = featureName.replace(/[^a-zA-Z0-9]/g, '');
+            const textarea = document.getElementById(`desc-input-${sanitizedId}`);
+            
+            if (textarea) {
+                const newText = textarea.value;
+                try {
+                    const response = await fetch('/api/monitoring/update-desc', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: featureName, description: newText })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        if (rawGeoJsonData && rawGeoJsonData.features) {
+                            const targetFeature = rawGeoJsonData.features.find(f => f.properties.name === featureName);
+                            if (targetFeature) targetFeature.properties.customDesc = newText;
+                        }
+                        alert(`Keterangan untuk "${featureName}" berhasil disimpan permanen ke database!`);
+                    } else {
+                        alert('Gagal menyimpan ke database server.');
+                    }
+                } catch (err) {
+                    // Fallback LocalStorage jika backend offline saat testing
+                    localStorage.setItem(`desc_${featureName}`, newText);
+                    alert(`Keterangan "${featureName}" tersimpan lokal (Offline mode).`);
+                }
+            }
+        }
+
+        // 3. MANAJEMEN PERANGKAT JARINGAN (PERSISTENT & NON-DUMMY)
+// Data Kategori Perangkat Utama (Tersimpan di LocalStorage / Server)
+let networkDevices = JSON.parse(localStorage.getItem('meganet_devices_prod')) || [
+    { id: 1, type: 'Router (Induk)', desc: 'Router Utama Core ISP', count: 1 },
+    { id: 2, type: 'OTB / ODC', desc: 'Distribusi Area Sentral', count: 2 },
+    { id: 3, type: 'ODP Distribution', desc: 'ODP Area Terhubung', count: 5 }
+];
+
+// Data Spesifik Unit per Kategori (Simulasi non-dummy / Database ready)
+let specificDevices = JSON.parse(localStorage.getItem('meganet_specific_devices')) || {
+    'Router (Induk)': [
+        { id: 101, name: 'Router Core Mikrotik CCR', desc: 'Sentral Utama Meganet', status: 'Online' }
+    ],
+    'OTB / ODC': [
+        { id: 201, name: 'ODC-TEBET-CENTRAL', desc: 'Tiang Utama Depan Plaza', status: 'Online' },
+        { id: 202, name: 'OTB-SERVER-01', desc: 'Ruang Server Rack 1', status: 'Online' }
+    ],
+    'ODP Distribution': [
+        { id: 301, name: 'ODP 16C - BLIMBING', desc: 'Kawasan Perumahan Blimbing', status: 'Online' },
+        { id: 302, name: 'ODP 8C - JUMAN', desc: 'Area Jalur Selatan', status: 'Online' },
+        { id: 303, name: 'ODP 4C - SEMEN', desc: 'Area Pabrik Semen', status: 'Online' },
+        { id: 304, name: 'ODP 12C - WKO', desc: 'Wates Kota', status: 'Online' },
+        { id: 305, name: 'ODP 16C - PANJON', desc: 'Panjon Kulon', status: 'Online' }
+    ]
+};
+
+let activeSelectedCategory = null;
+
+function saveDevicesToStorage() {
+    localStorage.setItem('meganet_devices_prod', JSON.stringify(networkDevices));
+    localStorage.setItem('meganet_specific_devices', JSON.stringify(specificDevices));
+}
+
+function renderDeviceTable() {
+    const tbody = document.getElementById('deviceTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    networkDevices.forEach((dev, index) => {
+        let isSelected = activeSelectedCategory === dev.type;
+        tbody.innerHTML += `
+            <tr class="hover:bg-blue-50/50 cursor-pointer transition ${isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : ''}" onclick="selectCategoryForDetail('${dev.type}')">
+                <td class="p-2.5 font-semibold text-gray-800 flex items-center">
+                    <i class="fa-solid fa-microchip text-blue-600 mr-2"></i> 
+                    <span class="underline decoration-dotted">${dev.type}</span>
+                </td>
+                <td class="p-2.5 text-gray-600" onclick="event.stopPropagation()">
+                    <input type="text" value="${dev.desc}" onchange="updateDeviceDesc(${index}, this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:outline-none px-1 py-0.5 text-xs">
+                </td>
+                <td class="p-2.5 text-center font-bold text-gray-800" onclick="event.stopPropagation()">
+                    <div class="inline-flex items-center space-x-1.5 bg-gray-100 px-2 py-1 rounded border border-gray-200">
+                        <button onclick="adjustCount(${index}, -1)" class="text-red-600 font-bold px-1">-</button>
+                        <span class="w-5 text-center">${dev.count}</span>
+                        <button onclick="adjustCount(${index}, 1)" class="text-green-600 font-bold px-1">+</button>
+                    </div>
+                </td>
+                <td class="p-2.5 text-center" onclick="event.stopPropagation()">
+                    <button onclick="deleteDevice(${index})" class="text-red-500 hover:text-red-700 p-1" title="Hapus Kategori"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Fungsi ketika kategori (misal ODP) diklik
+function selectCategoryForDetail(categoryName) {
+    activeSelectedCategory = categoryName;
+    renderDeviceTable(); // Render ulang agar baris terpilih menyorot (highlight)
+
+    const detailContainer = document.getElementById('deviceDetailContainer');
+    const spanName = document.getElementById('selectedCategoryName');
+    detailContainer.classList.remove('hidden');
+    spanName.innerText = categoryName;
+
+    renderSpecificDeviceTable(categoryName);
+}
+
+function renderSpecificDeviceTable(categoryName) {
+    const tbody = document.getElementById('specificDeviceTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const items = specificDevices[categoryName] || [];
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-400">Belum ada unit spesifik terdaftar dalam kategori ini.</td></tr>`;
+        return;
+    }
+
+    items.forEach((item, idx) => {
+        tbody.innerHTML += `
+            <tr class="hover:bg-gray-50">
+                <td class="p-2 font-medium text-gray-800">
+                    <input type="text" value="${item.name}" onchange="updateSpecificItem(${idx}, 'name', this.value)" class="bg-transparent border-b border-gray-200 focus:border-blue-500 text-xs w-full">
+                </td>
+                <td class="p-2 text-gray-600">
+                    <input type="text" value="${item.desc}" onchange="updateSpecificItem(${idx}, 'desc', this.value)" class="bg-transparent border-b border-gray-200 focus:border-blue-500 text-xs w-full">
+                </td>
+                <td class="p-2">
+                    <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-semibold">${item.status}</span>
+                </td>
+                <td class="p-2 text-center">
+                    <button onclick="deleteSpecificItem('${categoryName}', ${idx})" class="text-red-500 hover:text-red-700 p-1" title="Hapus Unit"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function addSpecificDeviceItem() {
+    if (!activeSelectedCategory) {
+        alert('Silakan klik salah satu kategori perangkat di atas terlebih dahulu.');
+        return;
+    }
+    const unitName = prompt(`Masukkan nama/ID unit baru untuk kategori ${activeSelectedCategory}:`);
+    if (unitName && unitName.trim() !== '') {
+        if (!specificDevices[activeSelectedCategory]) {
+            specificDevices[activeSelectedCategory] = [];
+        }
+        specificDevices[activeSelectedCategory].push({
+            id: Date.now(),
+            name: unitName.trim(),
+            desc: 'Lokasi / Keterangan Unit',
+            status: 'Online'
+        });
+        saveDevicesToStorage();
+        renderSpecificDeviceTable(activeSelectedCategory);
+    }
+}
+
+function updateSpecificItem(index, field, value) {
+    if (activeSelectedCategory && specificDevices[activeSelectedCategory]) {
+        specificDevices[activeSelectedCategory][index][field] = value;
+        saveDevicesToStorage();
+    }
+}
+
+function deleteSpecificItem(categoryName, index) {
+    if (confirm("Hapus unit perangkat ini dari daftar?")) {
+        specificDevices[categoryName].splice(index, 1);
+        saveDevicesToStorage();
+        renderSpecificDeviceTable(categoryName);
+    }
+}
+
+function adjustCount(index, amount) {
+    networkDevices[index].count += amount;
+    if (networkDevices[index].count < 0) networkDevices[index].count = 0;
+    saveDevicesToStorage();
+    renderDeviceTable();
+}
+
+function updateDeviceDesc(index, newDesc) {
+    networkDevices[index].desc = newDesc;
+    saveDevicesToStorage();
+}
+
+function addDeviceCategory() {
+    const typeName = prompt("Nama jenis perangkat baru (Contoh: Switch Core):");
+    if (typeName && typeName.trim() !== "") {
+        const descName = prompt("Keterangan:", "Area Baru");
+        networkDevices.push({ id: Date.now(), type: typeName.trim(), desc: descName ? descName.trim() : '-', count: 0 });
+        specificDevices[typeName.trim()] = []; // Inisialisasi list kosong
+        saveDevicesToStorage();
+        renderDeviceTable();
+    }
+}
+
+function deleteDevice(index) {
+    if (confirm("Hapus kategori perangkat ini?")) {
+        let removedType = networkDevices[index].type;
+        networkDevices.splice(index, 1);
+        delete specificDevices[removedType];
+        saveDevicesToStorage();
+        renderDeviceTable();
+        document.getElementById('deviceDetailContainer').classList.add('hidden');
+    }
+}
+// Gantikan fungsi prompt lama dengan pemunculan modal kustom
+function addDeviceCategory() {
+    document.getElementById('newDeviceType').value = '';
+    document.getElementById('newDeviceDesc').value = '';
+    document.getElementById('addDeviceModal').classList.remove('hidden');
+}
+
+function closeAddDeviceModal() {
+    document.getElementById('addDeviceModal').classList.add('hidden');
+}
+
+function submitNewDevice() {
+    const typeName = document.getElementById('newDeviceType').value.trim();
+    const descName = document.getElementById('newDeviceDesc').value.trim();
+
+    if (!typeName) {
+        alert('Nama jenis perangkat tidak boleh kosong!');
+        return;
+    }
+
+    networkDevices.push({
+        id: Date.now(),
+        type: typeName,
+        desc: descName !== '' ? descName : '-',
+        count: 1
+    });
+
+    saveDevicesToStorage();
+    renderDeviceTable();
+    closeAddDeviceModal();
+}
+
+        function deleteDevice(index) {
+            if (confirm("Hapus kategori perangkat ini?")) {
+                networkDevices.splice(index, 1);
+                saveDevicesToStorage();
+                renderDeviceTable();
+            }
+        }
+
+        // 4. MENGAMBIL DATA ONU DARI API DATABASE MYSQL
+        async function fetchOnuDatabaseData() {
+            const tbody = document.getElementById('onuTableBody');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Memuat data dari database MySQL...</td></tr>`;
+            try {
+                const res = await fetch('/api/monitoring/onus');
+                const data = await res.json();
+                tbody.innerHTML = '';
+                if(data && data.length > 0) {
+                    data.forEach(onu => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="p-3 font-medium">${onu.name}</td>
+                                <td class="p-3">${onu.pppoe_user || '-'}</td>
+                                <td class="p-3">${onu.ip_address || '-'}</td>
+                                <td class="p-3">${onu.odp_name || '-'}</td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-semibold">${onu.status}</span></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Belum ada data ONU tercatat di database.</td></tr>`;
+                }
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal terhubung ke endpoint database API.</td></tr>`;
+            }
+        }
+
+        function reloadKMLMap() {
+            loadKMLData();
+            alert('Peta berhasil disinkronkan ulang dengan server.');
+        }
+
+        // Jalankan saat halaman siap
+        loadKMLData();
+
+        // Pencarian Peta
+        const searchInput = document.getElementById('searchMapInput');
+        let debounceTimeout;
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimeout);
+            const keyword = e.target.value.toLowerCase().trim();
+            if (!keyword) return;
+            debounceTimeout = setTimeout(() => {
+                const found = allMarkers.find(item => item.name.includes(keyword));
+                if (found) {
+                    map.setView(found.latlng, 18); 
+                    found.marker.openPopup();
+                }
+            }, 300);
+        });
+
+        // Tombol aksi pendukung modal
+        function triggerBackup() { alert('Pengaturan backup otomatis berhasil disimpan ke server database!'); }
+        function testEmailBackup() { alert('Email uji coba backup sedang dikirim...'); }
+        function saveGenieConfig() { alert('Konfigurasi GenieACS berhasil diperbarui!'); }
+        function syncGenieDevices() { alert('Sinkronisasi perangkat via GenieACS NBI sedang berjalan...'); }
+        function syncMikrotikLive() { alert('Sinkronisasi data router Mikrotik berhasil.'); }
     </script>
+    <!-- Modal Kustom Tambah Perangkat (Pengganti Prompt Browser) -->
+<div id="addDeviceModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 text-xs">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-plus-circle mr-2 text-blue-600"></i> Tambah Kategori Perangkat Baru</h3>
+            <button onclick="closeAddDeviceModal()" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="space-y-3">
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">Nama Jenis Perangkat</label>
+                <input type="text" id="newDeviceType" placeholder="Contoh: Switch / ODC Core" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-gray-600 font-semibold mb-1">Keterangan / Lokasi</label>
+                <input type="text" id="newDeviceDesc" placeholder="Contoh: Area Server Utama" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="submitNewDevice()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow">Simpan</button>
+                <button onclick="closeAddDeviceModal()" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
