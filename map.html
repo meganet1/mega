@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Leaflet MarkerCluster CSS & JS (KUNCI UTAMA AGAR DI HP / PC TIDAK LAG MESKI RIBUAN TITIK) -->
+    <!-- Leaflet MarkerCluster CSS & JS (Agar Ringan di HP & PC) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
@@ -47,13 +47,19 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative">
         
-        <!-- SIDEBAR UTAMA -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-30">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <!-- SIDEBAR UTAMA (Responsif untuk HP & PC) -->
+        <aside id="mobileSidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white border-r border-gray-200 flex flex-col z-50 md:relative md:flex">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-gray-200 bg-meganet-red text-white">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
+                    <span class="text-xl font-bold tracking-wider">MEGANET</span>
+                </div>
+                <!-- Tombol Close Sidebar khusus HP -->
+                <button onclick="toggleSidebar()" class="md:hidden text-white text-lg focus:outline-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             
             <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
@@ -85,12 +91,20 @@
             </div>
         </aside>
 
+        <!-- Overlay gelap saat sidebar HP dibuka -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden relative">
+        <div class="flex-1 flex flex-col overflow-hidden relative w-full">
             
             <!-- TOPBAR PRO / TOOLBAR FITUR UTAMA -->
             <header class="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 shadow-sm">
                 <div class="flex items-center flex-wrap gap-2">
+                    <!-- Tombol Hamburger Menu khusus HP -->
+                    <button onclick="toggleSidebar()" class="md:hidden bg-meganet-red text-white p-2 rounded-lg text-xs font-semibold shadow-sm flex items-center justify-center">
+                        <i class="fa-solid fa-bars text-sm"></i>
+                    </button>
+
                     <span class="font-bold text-xs uppercase tracking-wider bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hidden xl:inline-block">
                         <i class="fa-solid fa-map-location-dot text-red-600 mr-2"></i> Map Monitoring
                     </span>
@@ -115,7 +129,7 @@
                 <div class="flex items-center space-x-3">
                     <div class="relative">
                         <input type="text" id="searchMapInput" placeholder="Cari nama ODP / Pelanggan..." 
-                            class="w-48 sm:w-64 px-3.5 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            class="w-40 sm:w-64 px-3.5 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <i class="fa-solid fa-search absolute right-3 top-2.5 text-gray-400 text-xs"></i>
                     </div>
                     
@@ -126,8 +140,8 @@
             </header>
 
             <!-- SUB-TOOLBAR STATUS & STATISTIK DATABASE -->
-            <div class="bg-gray-50 border-b border-gray-200 px-6 py-1.5 flex items-center justify-between text-xs text-gray-600 z-10">
-                <div class="flex items-center space-x-6">
+            <div class="bg-gray-50 border-b border-gray-200 px-4 md:px-6 py-1.5 flex items-center justify-between text-[11px] md:text-xs text-gray-600 z-10 overflow-x-auto whitespace-nowrap">
+                <div class="flex items-center space-x-4 md:space-x-6">
                     <span><i class="fa-solid fa-circle text-green-600 text-[8px] mr-1"></i> Database Connected (monitoring_meganet)</span>
                     <span><strong id="stat-odp" class="text-gray-900">0</strong> ODP</span>
                     <span><strong id="stat-aktif" class="text-green-600">0</strong> Aktif</span>
@@ -299,7 +313,15 @@
     <script src="togeojson.js"></script>
 
     <script>
-        // Inisialisasi Peta Leaflet dengan Canvas agar geser/zoom ringan di HP & PC
+        // Fungsi Toggle Sidebar untuk HP
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Inisialisasi Peta Leaflet dengan Canvas
         const map = L.map('ftthMap', {
             preferCanvas: true
         }).setView([-7.855, 110.232], 14);
@@ -325,7 +347,7 @@
         let allMarkers = []; 
         let layerGroupJalur = L.layerGroup().addTo(map);    
 
-        // MENGGUNAKAN MARKER CLUSTER: Mengelompokkan titik padat agar tidak bikin lag/patah-patah di HP
+        // Menggunakan MarkerCluster agar tidak lag/patah-patah di HP & PC
         let odpLayerGroup = L.markerClusterGroup({
             chunkedLoading: true,
             maxClusterRadius: 50,
@@ -520,7 +542,6 @@
                         offlineCount++;
                     }
 
-                    // Ikon asli Anda dipertahankan 100%
                     let customIcon = L.divIcon({
                         className: 'custom-div-icon',
                         html: `<div style="background-color: ${isOdp ? '#DC2626' : '#2563EB'}; color: white; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 9px;">
@@ -532,7 +553,6 @@
 
                     let marker = L.marker(latlng, { icon: customIcon });
 
-                    // Popup & Petunjuk Arah G-Maps Tetap Ada
                     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latlng.lat},${latlng.lng}`;
                     const popupContent = `
                         <div style="font-size: 11px; min-width: 150px;">
@@ -548,7 +568,6 @@
                     `;
                     marker.bindPopup(popupContent);
 
-                    // Label nama dioptimasi (hanya muncul saat di-zoom in >= 15 agar HP tidak lag)
                     if (name) {
                         marker.bindTooltip(name, {
                             permanent: false, 
@@ -560,7 +579,6 @@
 
                     allMarkers.push({ name: name.toLowerCase(), marker: marker, latlng: latlng, isOdp: isOdp });
 
-                    // Masuk ke MarkerCluster agar ringan di HP
                     if (isOdp) {
                         odpLayerGroup.addLayer(marker);
                     } else {
@@ -594,7 +612,6 @@
                 }
             });
 
-            // Kontrol nama saat di-zoom
             map.on('zoomend', function() {
                 const currentZoom = map.getZoom();
                 allMarkers.forEach(item => {
@@ -608,7 +625,6 @@
                 });
             });
 
-            // Perbarui statistik
             document.getElementById('stat-odp').innerText = odpCount;
             document.getElementById('stat-aktif').innerText = onlineCount;
             document.getElementById('stat-offline').innerText = offlineCount;
@@ -616,7 +632,6 @@
             document.getElementById('footer-offline').innerText = offlineCount;
         }
 
-        // Jalankan saat halaman siap + Fitur Pencarian
         document.addEventListener("DOMContentLoaded", () => {
             loadKMLData();
 
