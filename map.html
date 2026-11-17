@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } }
             }
@@ -25,273 +26,349 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        #ftthMap { width: 100%; height: 100%; }
+        /* Mematikan transisi bawaan Leaflet pada garis jalur agar animasi aliran mulus tanpa kedut */
+        .leaflet-overlay-pane path {
+            transition: none !important;
+        }
+        .leaflet-interactive { transition: all 0.3s ease; }
+        #ftthMap { width: 100%; height: 100%; background: #f8fafc; }
+        
+        /* Kontrol Leaflet & Atribusi */
+        .leaflet-control-zoom a {
+            width: 24px !important;
+            height: 24px !important;
+            line-height: 24px !important;
+            font-size: 12px !important;
+        }
+        .leaflet-touch .leaflet-control-zoom {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+        }
+        .leaflet-control-layers {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+            border: 1px solid #cbd5e1 !important;
+            font-family: inherit;
+            font-size: 10px;
+            padding: 3px;
+        }
+        .leaflet-control-layers-toggle {
+            width: 28px !important;
+            height: 28px !important;
+        }
+        
+        @media (max-width: 640px) {
+            .leaflet-control-attribution {
+                font-size: 9px !important;
+                background: rgba(255, 255, 255, 0.8) !important;
+                padding: 0 4px !important;
+            }
+        }
+
         .map-label {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #cbd5e1;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 4px;
             padding: 2px 6px;
             font-size: 9px;
             font-weight: bold;
-            color: #1e293b;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
             white-space: nowrap;
         }
-        .leaflet-control-layers {
-            border-radius: 8px !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
-            border: 1px solid #e2e8f0 !important;
-            font-family: inherit;
-            font-size: 12px;
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animasi Toast Notification */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+<body class="bg-gray-100 font-sans antialiased text-gray-800 overflow-hidden">
+    <div class="flex h-screen w-screen overflow-hidden relative">
         
-        <!-- SIDEBAR UTAMA -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-30">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <!-- SIDEBAR -->
+        <aside id="appSidebar" class="w-60 bg-white border-r border-gray-200 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            
+            <!-- Header Sidebar -->
+            <div class="h-12 sm:h-16 flex items-center justify-between px-3 sm:px-4 border-b border-gray-200 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-lg sm:text-2xl mr-2 shrink-0"></i>
+                    <span class="text-sm sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-1.5 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
             
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+            <!-- Navigasi Menu -->
+            <nav class="flex-1 px-2.5 sm:px-3 py-2 space-y-0.5 overflow-y-auto text-[11px] sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Dashboard</span>
+                </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+                <div class="pt-1.5 pb-0.5 text-[9px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-2.5">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Monitoring OLT</span>
+                </a>
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Monitoring ONU</span>
+                </a>
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Traffic Network</span>
+                </a>
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Peta Jaringan</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS</a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan</a>
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet</a>
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway</a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi</a>
+                <div class="pt-1.5 pb-0.5 text-[9px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-2.5">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-xs shrink-0"></i> <span class="ml-2">GenieACS</span>
+                </a>
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-xs shrink-0"></i> <span class="ml-2">Data Pelanggan</span>
+                </a>
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-xs shrink-0"></i> <span class="ml-2">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-xs shrink-0"></i> <span class="ml-2">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-xs shrink-0"></i> <span class="ml-2">Manajemen Teknisi</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
-                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+                <div class="pt-1.5 pb-0.5 text-[9px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-2.5">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-2.5 py-1.5 sm:py-2 font-medium rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-xs shrink-0"></i> <span class="ml-2">Pengaturan</span>
+                </a>
             </nav>
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+
+            <!-- Bagian Bawah: Keluar -->
+            <div class="p-2.5 border-t border-gray-200 flex items-center justify-between">
+                <span class="text-[10px] text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
-        <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden relative">
-            
-            <!-- TOPBAR PRO -->
-            <header class="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 shadow-sm">
-                <div class="flex items-center flex-wrap gap-2">
-                    <span class="font-bold text-xs uppercase tracking-wider bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hidden xl:inline-block">
-                        <i class="fa-solid fa-map-location-dot text-red-600 mr-2"></i> Map Monitoring
-                    </span>
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
-                    <button onclick="openModal('mikrotikModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
-                        <i class="fa-solid fa-sync mr-1.5"></i> Sync
-                    </button>
-                    <button onclick="openModal('genieacsModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
-                        <i class="fa-solid fa-microchip mr-1.5"></i> GenieACS
-                    </button>
-                    <button onclick="openModal('backupModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center shadow-sm transition">
-                        <i class="fa-solid fa-database mr-1.5"></i> Backup
-                    </button>
-                    <button onclick="openModal('perangkatModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 flex items-center shadow-sm transition">
-                        <i class="fa-solid fa-server text-amber-500 mr-1.5"></i> Perangkat
-                    </button>
-                    <button onclick="openModal('onuModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 flex items-center shadow-sm transition">
-                        <i class="fa-solid fa-users text-cyan-600 mr-1.5"></i> ONU
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50">
+            
+            <!-- TOPBAR PROFESIONAL -->
+            <header class="bg-white border-b border-gray-200 px-3 py-2 flex flex-col gap-2 z-30 shadow-xs">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                        <button onclick="toggleMobileSidebar()" class="text-gray-700 p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                            <i class="fa-solid fa-bars text-sm"></i>
+                        </button>
+                        <button onclick="openModal('mikrotikModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center shadow-sm shrink-0 transition">
+                            <i class="fa-solid fa-sync mr-1"></i> Sync
+                        </button>
+                        <button onclick="openModal('genieacsModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center shadow-sm shrink-0 transition">
+                            <i class="fa-solid fa-microchip mr-1"></i> Genie
+                        </button>
+                        <button onclick="openModal('backupModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center shadow-sm shrink-0 transition">
+                            <i class="fa-solid fa-database mr-1"></i> Backup
+                        </button>
+                        <button onclick="openModal('perangkatModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-gray-300 flex items-center shadow-sm shrink-0 transition">
+                            <i class="fa-solid fa-server text-amber-500 mr-1"></i> Perangkat
+                        </button>
+                        <button onclick="openModal('onuModal')" class="bg-white hover:bg-gray-50 text-gray-700 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-gray-300 flex items-center shadow-sm shrink-0 transition">
+                            <i class="fa-solid fa-users text-cyan-600 mr-1"></i> ONU
+                        </button>
+                    </div>
+
+                    <button onclick="reloadKMLMap()" class="bg-white hover:bg-gray-50 text-gray-700 p-1.5 rounded-lg text-xs font-medium border border-gray-300 flex items-center justify-center shrink-0 shadow-sm" title="Refresh Peta">
+                        <i class="fa-solid fa-rotate text-green-600"></i>
                     </button>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                    <div class="relative">
-                        <input type="text" id="searchMapInput" placeholder="Cari nama ODP / Pelanggan..." 
-                            class="w-48 sm:w-64 px-3.5 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <i class="fa-solid fa-search absolute right-3 top-2.5 text-gray-400 text-xs"></i>
+                <div class="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
+                    <div class="relative flex-1">
+                        <input type="text" id="searchMapInput" placeholder="Cari ODP / Pelanggan..." 
+                            class="w-full px-3 py-1.5 text-[11px] bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <i class="fa-solid fa-search absolute right-3 top-2 text-gray-400 text-[11px]"></i>
                     </div>
-                    
-                    <button onclick="reloadKMLMap()" class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 flex items-center" title="Refresh Peta">
-                        <i class="fa-solid fa-rotate mr-1 text-green-600"></i> Refresh
-                    </button>
                 </div>
             </header>
 
             <!-- SUB-TOOLBAR STATUS -->
-            <div class="bg-gray-50 border-b border-gray-200 px-6 py-1.5 flex items-center justify-between text-xs text-gray-600 z-10">
-                <div class="flex items-center space-x-6">
-                    <span><i class="fa-solid fa-circle text-green-600 text-[8px] mr-1"></i> Database Connected (monitoring_meganet)</span>
-                    <span><strong id="stat-odp" class="text-gray-900">0</strong> ODP</span>
-                    <span><strong id="stat-aktif" class="text-green-600">0</strong> Aktif</span>
-                    <span><strong id="stat-offline" class="text-red-600">0</strong> Offline/LOS</span>
+            <div class="bg-white border-b border-gray-200 px-3 py-1.5 flex items-center justify-between text-[11px] text-gray-600 z-20 shadow-xs">
+                <div class="flex items-center space-x-3 overflow-x-auto no-scrollbar py-0.5">
+                    <span class="whitespace-nowrap flex items-center"><i class="fa-solid fa-circle text-green-600 text-[7px] mr-1"></i> DB Connected</span>
+                    <span class="whitespace-nowrap border-r pr-3 border-gray-200"><strong id="stat-odp" class="text-gray-900">0</strong> ODP (<span id="stat-odp-online" class="text-green-600 font-semibold">0</span> Aktif)</span>
+                    <span class="whitespace-nowrap"><strong id="stat-customer" class="text-gray-900">0</strong> Pelanggan (<span id="stat-cust-online" class="text-green-600 font-semibold">0</span> Aktif, <span id="stat-cust-offline" class="text-red-600 font-semibold">0</span> Offline)</span>
                 </div>
-                <div>
-                    <span class="text-gray-500">Online: <span id="footer-online" class="text-green-600 font-bold">0</span></span> | 
-                    <span class="text-gray-500">Offline: <span id="footer-offline" class="text-red-600 font-bold">0</span></span>
+                <div class="whitespace-nowrap text-[11px] shrink-0 pl-2">
+                    <span class="text-green-600 font-bold" id="footer-online">0</span> | 
+                    <span class="text-red-600 font-bold" id="footer-offline">0</span>
                 </div>
             </div>
 
             <!-- MAP CONTAINER -->
-            <main class="flex-1 relative flex flex-col">
-                <div id="ftthMap" class="flex-1 w-full h-full z-0"></div>
+            <main class="flex-1 relative flex flex-col w-full h-full">
+                <div id="ftthMap" class="w-full h-full z-0"></div>
             </main>
         </div>
     </div>
 
+    <!-- CONTAINER TOAST NOTIFICATION -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- ==================== MODAL-MODAL INTERAKTIF ==================== -->
 
     <!-- Modal Mikrotik Sync -->
-    <div id="mikrotikModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-network-wired mr-2 text-blue-600"></i> Sync Mikrotik</h3>
-                <button onclick="closeModal('mikrotikModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div id="mikrotikModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-3">
+        <div class="bg-white text-gray-800 p-4 rounded-xl w-full max-w-sm shadow-xl border border-gray-200 text-xs">
+            <div class="flex justify-between items-center mb-2.5">
+                <span class="font-bold flex items-center text-gray-900 text-sm"><i class="fa-solid fa-network-wired mr-2 text-blue-600"></i> Sync Mikrotik</span>
+                <button onclick="closeModal('mikrotikModal')" class="text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-            <p class="text-xs text-gray-500 mb-4">Sinkronisasi data trafik, interface, dan status router langsung dari perangkat Mikrotik via API/SSH.</p>
-            <div class="space-y-3">
-                <button onclick="syncMikrotikLive()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow">Sinkronisasi Semua Router</button>
-                <button onclick="closeModal('mikrotikModal')" class="w-full py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs text-gray-700">Tutup</button>
+            <p class="text-gray-500 mb-3 text-[11px]">Sinkronisasi data trafik, interface, dan status router langsung dari perangkat Mikrotik via API/SSH.</p>
+            <div class="space-y-2">
+                <button onclick="syncMikrotikLive()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm text-xs">Sinkronisasi Semua Router</button>
+                <button onclick="closeModal('mikrotikModal')" class="w-full py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-xs">Tutup</button>
             </div>
         </div>
     </div>
 
     <!-- Modal GenieACS -->
-    <div id="genieacsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-microchip mr-2 text-indigo-600"></i> GenieACS Sync & Config</h3>
-                <button onclick="closeModal('genieacsModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div id="genieacsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-3">
+        <div class="bg-white text-gray-800 p-4 rounded-xl w-full max-w-sm shadow-xl border border-gray-200 text-xs">
+            <div class="flex justify-between items-center mb-2.5">
+                <span class="font-bold flex items-center text-gray-900 text-sm"><i class="fa-solid fa-microchip mr-2 text-indigo-600"></i> GenieACS Config</span>
+                <button onclick="closeModal('genieacsModal')" class="text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5">
                 <div>
-                    <label class="block text-gray-600 mb-1 font-semibold">GENIEACS NBI URL</label>
-                    <input type="text" id="genieUrlInput" value="http://192.168.1.100:7557" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-gray-600 mb-1 font-semibold text-[10px]">GENIEACS NBI URL</label>
+                    <input type="text" id="genieUrlInput" value="http://192.168.1.100:7557" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 text-xs">
                 </div>
-                <button onclick="saveGenieConfig()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold border border-gray-300 text-gray-700">Simpan Config</button>
-                <button onclick="syncGenieDevices()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow">Sync Devices (GenieACS)</button>
-                <button onclick="closeModal('genieacsModal')" class="w-full py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700">Tutup</button>
+                <button onclick="saveGenieConfig()" class="w-full py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold border border-gray-300 text-gray-700 text-xs">Simpan Config</button>
+                <button onclick="syncGenieDevices()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-sm text-xs">Sync Devices</button>
+                <button onclick="closeModal('genieacsModal')" class="w-full py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-xs">Tutup</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Backup & Restore -->
-    <div id="backupModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto text-xs">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-database mr-2 text-emerald-600"></i> Pengaturan Backup & Restore</h3>
-                <button onclick="closeModal('backupModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+    <div id="backupModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-3">
+        <div class="bg-white text-gray-800 p-4 rounded-xl w-full max-w-md shadow-xl border border-gray-200 max-h-[85vh] overflow-y-auto text-xs">
+            <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
+                <span class="font-bold flex items-center text-gray-900 text-sm"><i class="fa-solid fa-database mr-2 text-emerald-600"></i> Backup & Restore</span>
+                <button onclick="closeModal('backupModal')" class="text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
             
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div>
                     <label class="block text-gray-600 font-semibold mb-1 uppercase tracking-wider text-[10px]">Email Penerima Backup</label>
-                    <input type="email" id="backupEmail" placeholder="admin@meganet.net.id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <input type="email" id="backupEmail" placeholder="admin@meganet.net.id" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 text-xs">
                 </div>
                 <div>
                     <label class="block text-gray-600 font-semibold mb-1 uppercase tracking-wider text-[10px]">Jam Backup Otomatis</label>
-                    <input type="text" id="backupTime" value="00:00" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <input type="text" id="backupTime" value="00:00" class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 text-xs">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="triggerBackup()" class="py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white shadow"><i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Backup</button>
-                    <button onclick="testEmailBackup()" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white shadow"><i class="fa-solid fa-paper-plane mr-1"></i> Tes Kirim Sekarang</button>
+                    <button onclick="triggerBackup()" class="py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white shadow-sm text-xs">Simpan Backup</button>
+                    <button onclick="testEmailBackup()" class="py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white shadow-sm text-xs">Tes Kirim</button>
                 </div>
 
-                <hr class="border-gray-200">
+                <hr class="border-gray-200 my-1">
 
                 <div>
-                    <p class="font-bold text-amber-600 mb-2">2. Restore Database MySQL</p>
-                    <div class="space-y-2">
-                        <input type="file" id="fileSqlite" class="hidden" accept=".sql,.sqlite" onchange="uploadDatabaseBackup(this)">
-                        <button onclick="document.getElementById('fileSqlite').click()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-upload mr-1"></i> Restore database.sql</button>
-                    </div>
+                    <p class="font-bold text-amber-600 mb-1 text-[11px]">Restore Database MySQL</p>
+                    <input type="file" id="fileSqlite" class="hidden" accept=".sql,.sqlite" onchange="uploadDatabaseBackup(this)">
+                    <button onclick="document.getElementById('fileSqlite').click()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 rounded-lg font-semibold text-white text-xs shadow-sm">Restore database.sql</button>
                 </div>
 
-                <hr class="border-gray-200">
-
                 <div>
-                    <p class="font-bold text-amber-600 mb-2">3. Import & Export Data Pelanggan (Excel)</p>
-                    <div class="space-y-2">
+                    <p class="font-bold text-amber-600 mb-1 text-[11px]">Import & Export Pelanggan</p>
+                    <div class="grid grid-cols-2 gap-2">
                         <input type="file" id="fileExcel" class="hidden" accept=".xlsx,.xls,.csv" onchange="importExcelData(this)">
-                        <button onclick="document.getElementById('fileExcel').click()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-file-excel mr-1"></i> Import Data Excel</button>
-                        <button onclick="exportExcelData()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-file-excel mr-1"></i> Export Data Excel</button>
+                        <button onclick="document.getElementById('fileExcel').click()" class="py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold text-white text-xs shadow-sm">Import Excel</button>
+                        <button onclick="exportExcelData()" class="py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-white text-xs shadow-sm">Export Excel</button>
                     </div>
                 </div>
-
-                <hr class="border-gray-200">
 
                 <div>
-                    <p class="font-bold text-amber-600 mb-2">4. Sinkronisasi Google Earth (KML/KMZ)</p>
-                    <div class="space-y-2">
-                        <input type="file" id="fileKml" class="hidden" accept=".kml,.kmz" onchange="importKmlFile(this)">
-                        <button onclick="document.getElementById('fileKml').click()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 rounded-lg font-semibold text-white"><i class="fa-solid fa-earth-americas mr-1"></i> Import KML/KMZ Baru</button>
-                    </div>
+                    <p class="font-bold text-amber-600 mb-1 text-[11px]">Google Earth KML/KMZ</p>
+                    <input type="file" id="fileKml" class="hidden" accept=".kml,.kmz" onchange="importKmlFile(this)">
+                    <button onclick="document.getElementById('fileKml').click()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 rounded-lg font-semibold text-white text-xs shadow-sm">Import KML Baru</button>
                 </div>
 
-                <button onclick="closeModal('backupModal')" class="w-full mt-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium">Tutup</button>
+                <button onclick="closeModal('backupModal')" class="w-full mt-2 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-xs font-medium">Tutup</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Perangkat -->
-    <div id="perangkatModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto text-xs">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-server mr-2 text-amber-500"></i> Manajemen Perangkat & Keterangan Jaringan</h3>
-                <button onclick="closeModal('perangkatModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+    <div id="perangkatModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-3">
+        <div class="bg-white text-gray-800 p-4 rounded-xl w-full max-w-xl shadow-xl border border-gray-200 max-h-[85vh] overflow-y-auto text-xs">
+            <div class="flex justify-between items-center mb-2.5">
+                <span class="font-bold flex items-center text-gray-900 text-sm"><i class="fa-solid fa-server mr-2 text-amber-500"></i> Manajemen Perangkat</span>
+                <button onclick="closeModal('perangkatModal')" class="text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-            <div class="mb-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <span class="font-semibold text-gray-700">Klik baris perangkat di bawah untuk melihat detail item spesifiknya</span>
-                <button onclick="addDeviceCategory()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition flex items-center">
-                    <i class="fa-solid fa-plus mr-1"></i> Tambah Kategori
-                </button>
-            </div>
-            <div class="overflow-x-auto mb-6">
+            <div class="overflow-x-auto mb-3">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 uppercase tracking-wider text-[10px]">
-                            <th class="p-2.5">Jenis Perangkat (Klik untuk Detail)</th>
-                            <th class="p-2.5">Keterangan / Lokasi</th>
-                            <th class="p-2.5 text-center">Jumlah</th>
-                            <th class="p-2.5 text-center">Aksi</th>
+                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 uppercase tracking-wider text-[9px]">
+                            <th class="p-2">Perangkat</th>
+                            <th class="p-2">Keterangan</th>
+                            <th class="p-2 text-center">Jumlah</th>
+                            <th class="p-2 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="deviceTableBody" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
-            <button onclick="closeModal('perangkatModal')" class="w-full mt-5 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium">Tutup</button>
+            <button onclick="closeModal('perangkatModal')" class="w-full py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-xs">Tutup</button>
         </div>
     </div>
 
     <!-- Modal ONU -->
-    <div id="onuModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-4xl shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold flex items-center"><i class="fa-solid fa-users mr-2 text-cyan-600"></i> Tabel Data ONU & Pelanggan</h3>
-                <button onclick="closeModal('onuModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div id="onuModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-3">
+        <div class="bg-white text-gray-800 p-4 rounded-xl w-full max-w-2xl shadow-xl border border-gray-200 max-h-[85vh] overflow-y-auto text-xs">
+            <div class="flex justify-between items-center mb-2.5">
+                <span class="font-bold flex items-center text-gray-900 text-sm"><i class="fa-solid fa-users mr-2 text-cyan-600"></i> Tabel Data ONU & Pelanggan</span>
+                <button onclick="closeModal('onuModal')" class="text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-            <div class="overflow-x-auto text-xs">
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200">
-                            <th class="p-3">Nama Pelanggan</th>
-                            <th class="p-3">Akun PPPoE</th>
-                            <th class="p-3">IP Address</th>
-                            <th class="p-3">ODP Terhubung</th>
-                            <th class="p-3">Status</th>
+                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 text-[10px]">
+                            <th class="p-2">Pelanggan</th>
+                            <th class="p-2">PPPoE</th>
+                            <th class="p-2">IP Address</th>
+                            <th class="p-2">ODP</th>
+                            <th class="p-2">Status</th>
                         </tr>
                     </thead>
                     <tbody id="onuTableBody" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
-            <button onclick="closeModal('onuModal')" class="w-full mt-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs text-gray-700">Tutup</button>
+            <button onclick="closeModal('onuModal')" class="w-full mt-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-xs">Tutup</button>
         </div>
     </div>
 
@@ -299,15 +376,49 @@
     <script src="togeojson.js"></script>
 
     <script>
-        // Inisialisasi Peta Leaflet TANPA preferCanvas (menggunakan SVG agar animasi garis path bisa berjalan sempurna)
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = type === 'success' 
+                ? 'bg-emerald-900/95 border-emerald-700 text-emerald-100' 
+                : 'bg-red-900/95 border-red-700 text-red-100';
+            
+            let iconClass = type === 'success' 
+                ? 'fa-circle-check text-emerald-400' 
+                : 'fa-triangle-exclamation text-red-400';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md text-xs w-80 toast-enter ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base mt-0.5 shrink-0"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-sm mb-0.5">${title}</div>
+                    <div class="text-[11px] opacity-90 leading-relaxed">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
         const map = L.map('ftthMap', {
             preferCanvas: false 
         }).setView([-7.855, 110.232], 14);
 
-        // Pilihan Mode Peta (Hanya Biasa dan Satelit)
         const baseBiasa = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; MEGANET FTTH MONITORING PRODUCTION'
+            attribution: '&copy; MEGANET FTTH MONITORING'
         });
 
         const baseSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -318,14 +429,13 @@
         baseBiasa.addTo(map);
 
         L.control.layers({
-            "🗺️ Peta Biasa": baseBiasa,
-            "🛰️ Satelit": baseSatelit
+            "Default": baseBiasa,
+            "Satelit": baseSatelit
         }, null, { position: 'topright' }).addTo(map);
 
         let allMarkers = []; 
         let layerGroupJalur = L.layerGroup().addTo(map);    
 
-        // Marker Cluster untuk ODP & Pelanggan
         let odpLayerGroup = L.markerClusterGroup({
             chunkedLoading: true,
             maxClusterRadius: 50,
@@ -352,8 +462,6 @@
             loadKMLData();
         }
 
-        // ==================== FUNGSI UPLOAD & RESTORE ====================
-
         async function triggerBackup() {
             try {
                 const email = document.getElementById('backupEmail').value;
@@ -363,20 +471,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, time })
                 });
-                if (response.ok) alert('Berhasil: Pengaturan backup disimpan.');
-                else alert('Gagal: Server merespons dengan kesalahan.');
+                if (response.ok) showToast('Berhasil', 'Pengaturan backup berhasil disimpan.');
+                else showToast('Gagal', 'Server merespons dengan kesalahan.', 'error');
             } catch (e) {
-                alert('Berhasil: Pengaturan backup disimpan secara lokal.');
+                showToast('Informasi', 'Pengaturan disimpan secara lokal.');
             }
         }
 
         async function testEmailBackup() {
             try {
                 const response = await fetch('/api/backup/test-email', { method: 'POST' });
-                if (response.ok) alert('Berhasil: Email tes backup terkirim.');
-                else alert('Gagal: Pengiriman email tes gagal.');
+                if (response.ok) showToast('Berhasil', 'Email tes berhasil dikirim.');
+                else showToast('Gagal', 'Gagal mengirim email tes.', 'error');
             } catch (e) {
-                alert('Gagal: Koneksi server email terputus.');
+                showToast('Koneksi Gagal', 'Tidak dapat terhubung ke server.', 'error');
             }
         }
 
@@ -389,11 +497,11 @@
             try {
                 const response = await fetch('/api/database/restore', { method: 'POST', body: formData });
                 if (response.ok) {
-                    alert('Berhasil: Database berhasil direstore.');
-                    location.reload();
-                } else alert('Gagal: File database tidak valid.');
+                    showToast('Berhasil', 'Database berhasil direstore.');
+                    setTimeout(() => location.reload(), 1500);
+                } else showToast('Gagal', 'File database tidak valid.', 'error');
             } catch (e) {
-                alert('Gagal: Terjadi kesalahan saat mengunggah file database.');
+                showToast('Kesalahan', 'Gagal mengunggah file database.', 'error');
             }
         }
 
@@ -405,29 +513,37 @@
 
             try {
                 const response = await fetch('/api/customers/import-excel', { method: 'POST', body: formData });
-                if (response.ok) alert('Berhasil: Data Excel pelanggan berhasil diimpor.');
-                else alert('Gagal: Format file Excel tidak sesuai.');
+                if (response.ok) showToast('Berhasil', 'Data pelanggan Excel berhasil diimpor.');
+                else showToast('Gagal', 'Format file Excel tidak sesuai.', 'error');
             } catch (e) {
-                alert('Gagal: Koneksi server gagal saat import data.');
+                showToast('Koneksi Gagal', 'Gagal terhubung ke server.', 'error');
             }
         }
 
         function exportExcelData() {
             try {
                 window.location.href = '/api/customers/export-excel';
-                alert('Berhasil: Mengunduh file Excel pelanggan.');
+                showToast('Mengunduh', 'File Excel sedang disiapkan dan diunduh.');
             } catch (e) {
-                alert('Gagal: Tidak dapat mengunduh file Excel.');
+                showToast('Gagal', 'Gagal mengunduh data.', 'error');
             }
         }
 
         function importKmlFile(input) {
             if (!input.files || !input.files[0]) {
-                alert('Gagal: Tidak ada file KML/KMZ yang dipilih.');
+                showToast('Peringatan', 'Tidak ada file KML/KMZ yang dipilih.', 'error');
                 return;
             }
 
             const file = input.files[0];
+            const fileName = file.name.toLowerCase();
+
+            if (!fileName.endsWith('.kml') && !fileName.endsWith('.kmz')) {
+                showToast('Impor Gagal', 'Format file tidak didukung. Harap unggah file berformat .kml atau .kmz.', 'error');
+                input.value = '';
+                return;
+            }
+
             const reader = new FileReader();
 
             reader.onload = function(e) {
@@ -435,31 +551,38 @@
                     const kmlText = e.target.result;
                     const domParser = new DOMParser();
                     const kmlDom = domParser.parseFromString(kmlText, 'text/xml');
-                    
+
+                    const parserError = kmlDom.querySelector('parsererror');
+                    if (parserError) {
+                        showToast('Impor Gagal', 'Struktur file XML rusak atau kode di dalam file KML tidak valid.', 'error');
+                        return;
+                    }
+
                     const convertedGeoJson = toGeoJSON.kml(kmlDom);
 
                     if (!convertedGeoJson || !convertedGeoJson.features || convertedGeoJson.features.length === 0) {
-                        alert('Gagal: File KML kosong atau format tidak valid.');
+                        showToast('Impor Gagal', 'File KML tidak memiliki objek koordinat atau fitur peta (features kosong).', 'error');
                         return;
                     }
 
                     renderMapLayers(convertedGeoJson);
-                    alert('Berhasil: Peta KML/KMZ baru berhasil diimpor dan dimuat!');
+                    showToast('Impor Berhasil', `File "${file.name}" berhasil dimuat ke peta (${convertedGeoJson.features.length} objek ditemukan).`, 'success');
                     closeModal('backupModal');
                 } catch (error) {
-                    console.error(error);
-                    alert('Gagal: Terjadi kesalahan saat memproses file KML.');
+                    showToast('Kesalahan Sistem', 'Gagal memproses KML: ' + error.message, 'error');
+                } finally {
+                    input.value = '';
                 }
             };
 
             reader.onerror = function() {
-                alert('Gagal: Membaca file gagal.');
+                showToast('Gagal Membaca', 'Terjadi kesalahan saat membaca file dari perangkat.', 'error');
+                input.value = '';
             };
 
             reader.readAsText(file);
         }
 
-        // ==================== MEMUAT PETA KML DARI SERVER ====================
         async function loadKMLData() {
             try {
                 let savedDescMap = {};
@@ -467,14 +590,12 @@
                     const descRes = await fetch('/api/monitoring/descriptions');
                     if (descRes.ok) {
                         const descList = await descRes.json();
-                        descList.forEach(item => {
-                            savedDescMap[item.name] = item.description;
-                        });
+                        descList.forEach(item => { savedDescMap[item.name] = item.description; });
                     }
-                } catch(e) { console.log('Menggunakan cache lokal untuk deskripsi.'); }
+                } catch(e) {}
 
                 const response = await fetch('mapping_meganet.kml?v=' + new Date().getTime());
-                if (!response.ok) throw new Error("File mapping_meganet.kml tidak ditemukan!");
+                if (!response.ok) throw new Error("File KML tidak ditemukan");
                 const kmlText = await response.text();
 
                 const domParser = new DOMParser();
@@ -502,44 +623,49 @@
             customerLayerGroup.clearLayers();
             allMarkers = [];
 
-            let onlineCount = 0;
-            let offlineCount = 0;
             let odpCount = 0;
+            let odpOnline = 0;
+            let customerCount = 0;
+            let customerOnline = 0;
+            let customerOffline = 0;
 
             L.geoJSON(geojsonData, {
                 pointToLayer: function (feature, latlng) {
                     const name = feature.properties.name || '';
                     const desc = feature.properties.customDesc || feature.properties.description || 'Tidak ada keterangan';
                     let isOdp = name.toUpperCase().includes('ODP');
-                    
+                    let isOnline = true; 
+
                     if (isOdp) {
                         odpCount++;
-                        onlineCount++;
+                        if (isOnline) odpOnline++;
                     } else {
-                        offlineCount++;
+                        customerCount++;
+                        if (isOnline) customerOnline++;
+                        else customerOffline++;
                     }
 
                     let customIcon = L.divIcon({
                         className: 'custom-div-icon',
-                        html: `<div style="background-color: ${isOdp ? '#DC2626' : '#2563EB'}; color: white; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 9px;">
+                        html: `<div style="background-color: ${isOdp ? '#DC2626' : (isOnline ? '#2563EB' : '#9CA3AF')}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 8px;">
                                     <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'}"></i>
                                </div>`,
-                        iconSize: [22, 22],
-                        iconAnchor: [11, 11]
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
                     });
 
                     let marker = L.marker(latlng, { icon: customIcon });
 
                     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latlng.lat},${latlng.lng}`;
                     const popupContent = `
-                        <div style="font-size: 11px; min-width: 150px;">
+                        <div style="font-size: 11px; min-width: 140px; color: #333;">
                             <strong style="font-size: 12px; color: ${isOdp ? '#DC2626' : '#2563EB'};">
                                 <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'} mr-1"></i> ${name || (isOdp ? 'ODP' : 'Pelanggan')}
                             </strong><br>
                             <p style="margin: 4px 0; color: #4b5563;">${desc}</p>
-                            <hr style="margin: 6px 0; border-color: #e5e7eb;">
-                            <a href="${googleMapsUrl}" target="_blank" style="display: inline-block; background-color: #2563EB; color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-                                <i class="fa-solid fa-directions mr-1"></i> Petunjuk Arah (G-Maps)
+                            <hr style="margin: 4px 0; border-color: #e5e7eb;">
+                            <a href="${googleMapsUrl}" target="_blank" style="display: inline-block; background-color: #2563EB; color: white; padding: 2px 6px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+                                <i class="fa-solid fa-directions mr-1"></i> G-Maps
                             </a>
                         </div>
                     `;
@@ -547,10 +673,10 @@
 
                     if (name) {
                         marker.bindTooltip(name, {
-                            permanent: false, 
+                            permanent: true, // Selalu tampilkan nama secara permanen
                             direction: 'right',
                             className: 'map-label',
-                            offset: [6, 0]
+                            offset: [5, 0]
                         });
                     }
 
@@ -577,51 +703,50 @@
                 },
                 style: function(feature) {
                     return {
-                        color: feature.properties.stroke || '#16A34A',
-                        weight: feature.properties['stroke-width'] || 3,
+                        color: '#16A34A',
+                        weight: 4,
                         opacity: 0.9,
-                        dashArray: '8, 12', // Efek putus-putus jalur fiber
+                        dashArray: '6, 14',
                         dashOffset: '0'
                     };
                 },
                 onEachFeature: function(feature, layer) {
                     if (feature.geometry.type !== 'Point') {
+                        let glowLayer = L.polyline(layer.getLatLngs(), {
+                            color: '#22c55e',
+                            weight: 8,
+                            opacity: 0.3,
+                            interactive: false
+                        });
+                        layerGroupJalur.addLayer(glowLayer);
                         layerGroupJalur.addLayer(layer);
                     }
                 }
             });
 
-            // Animasi JavaScript Loop untuk menggerakkan dashOffset secara halus
-            let offset = 20;
+            // Jalur Fiber Mengalir Mulus Tanpa Kedut
+            let offset = 0;
             if (window.fiberFlowInterval) clearInterval(window.fiberFlowInterval);
             window.fiberFlowInterval = setInterval(() => {
-                offset -= 1;
-                if (offset <= 0) offset = 20;
+                offset -= 2;
+                if (offset <= -20) {
+                    offset = 0;
+                }
                 layerGroupJalur.eachLayer(function (layer) {
-                    if (layer.setStyle) {
+                    if (layer.setStyle && layer.options.weight === 4) {
                         layer.setStyle({ dashOffset: offset.toString() });
                     }
                 });
             }, 50);
 
-            map.on('zoomend', function() {
-                const currentZoom = map.getZoom();
-                allMarkers.forEach(item => {
-                    if (item.marker.getTooltip()) {
-                        if (currentZoom >= 15) {
-                            item.marker.openTooltip();
-                        } else {
-                            item.marker.closeTooltip();
-                        }
-                    }
-                });
-            });
-
             document.getElementById('stat-odp').innerText = odpCount;
-            document.getElementById('stat-aktif').innerText = onlineCount;
-            document.getElementById('stat-offline').innerText = offlineCount;
-            document.getElementById('footer-online').innerText = onlineCount;
-            document.getElementById('footer-offline').innerText = offlineCount;
+            document.getElementById('stat-odp-online').innerText = odpOnline;
+            document.getElementById('stat-customer').innerText = customerCount;
+            document.getElementById('stat-cust-online').innerText = customerOnline;
+            document.getElementById('stat-cust-offline').innerText = customerOffline;
+            
+            document.getElementById('footer-online').innerText = odpOnline + customerOnline;
+            document.getElementById('footer-offline').innerText = customerOffline;
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -639,7 +764,7 @@
                             map.setView(found.latlng, 18);
                             found.marker.openPopup();
                         } else {
-                            alert('Data ODP atau Pelanggan dengan nama "' + keyword + '" tidak ditemukan.');
+                            showToast('Pencarian', 'Data ODP atau Pelanggan tidak ditemukan.', 'error');
                         }
                     }
                 });
