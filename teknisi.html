@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Teknisi Lapangan - MEGANET FTTH MONITORING</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manajemen Teknisi & Presensi - MEGANET FTTH MONITORING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } }
             }
@@ -15,85 +16,226 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media screen and (max-width: 768px) {
+            input[type="text"], input[type="search"], select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('meganet_theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+<body class="bg-gray-100 dark:bg-[#0f172a] font-sans antialiased text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-200">
+    <div class="flex h-screen w-screen overflow-hidden relative">
         
         <!-- SIDEBAR UTAMA -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-30">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <aside id="appSidebar" class="w-64 bg-white dark:bg-[#1e293b] border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="h-14 sm:h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-xl sm:text-2xl mr-2.5 shrink-0"></i>
+                    <span class="text-base sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-2 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
             
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto text-xs sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Dashboard</span>
+                </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring OLT</span>
+                </a>
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring ONU</span>
+                </a>
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Traffic Network</span>
+                </a>
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Peta Jaringan</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS</a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan</a>
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet</a>
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway</a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-sm shrink-0"></i> <span class="ml-2.5">GenieACS</span>
+                </a>
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-sm shrink-0"></i> <span class="ml-2.5">Data Pelanggan</span>
+                </a>
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-sm shrink-0"></i> <span class="ml-2.5">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-sm shrink-0"></i> <span class="ml-2.5">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-3 py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red dark:bg-meganet-red/20 dark:text-red-400 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-sm shrink-0"></i> <span class="ml-2.5">Manajemen Teknisi</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
-                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan</a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Pengaturan</span>
+                </a>
             </nav>
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+
+            <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-y-auto">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50 dark:bg-[#0f172a]">
             
             <!-- TOPBAR -->
-            <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
-                <h1 class="text-lg font-bold text-gray-800 flex items-center">
-                    <i class="fa-solid fa-user-gear text-purple-600 mr-2.5"></i> Manajemen Teknisi Lapangan
-                </h1>
-                <button onclick="openModal('teknisiModal')" class="bg-meganet-red hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm flex items-center transition">
-                    <i class="fa-solid fa-user-plus mr-1.5"></i> Tambah Teknisi
-                </button>
+            <header class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-30 shadow-xs shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="text-gray-700 dark:text-gray-200 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white uppercase tracking-wide">Manajemen Teknisi & Presensi</h1>
+                </div>
+
+                <div class="flex items-center space-x-3 text-xs sm:text-sm">
+                    <button onclick="openModal('teknisiModal')" class="bg-meganet-red hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm flex items-center transition">
+                        <i class="fa-solid fa-user-plus mr-1.5"></i> Tambah Teknisi
+                    </button>
+                    <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2.5 rounded-lg transition" title="Ganti Tema">
+                        <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+                </div>
             </header>
 
             <!-- KONTEN UTAMA -->
-            <main class="p-6 space-y-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 space-y-6">
                 
-                <!-- GRID DAFTAR TEKNISI -->
-                <div id="teknisiCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Dimuat dinamis via JavaScript -->
+                <!-- GRID DAFTAR TEKNISI & PRESENSI DENGAN FOTO -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white">Daftar Teknisi & Presensi Lapangan</h2>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Klik Hadir/Izin untuk absen dengan foto, timestamp, & rencana kegiatan</span>
+                    </div>
+                    <div id="teknisiCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Dimuat dinamis via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- SECTION TABEL LOG PRESENSI HARIAN -->
+                <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white flex items-center">
+                                <i class="fa-solid fa-file-lines text-purple-600 mr-2"></i> Log Presensi & Kegiatan Harian Teknisi
+                            </h2>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Catatan waktu check-in, foto bukti, dan rincian aktivitas lapangan teknisi.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="exportPresensiCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-sm flex items-center transition">
+                                <i class="fa-solid fa-file-csv mr-1.5 text-sm"></i> Export CSV
+                            </button>
+                            <button onclick="clearPresensiLogs()" class="text-xs text-red-600 hover:underline px-2"><i class="fa-solid fa-trash mr-1"></i> Reset Log</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-[10px]">
+                                    <th class="p-3.5">Timestamp</th>
+                                    <th class="p-3.5">Nama Teknisi</th>
+                                    <th class="p-3.5">Foto & Stempel</th>
+                                    <th class="p-3.5">Status</th>
+                                    <th class="p-3.5">Rincian Kegiatan & Aktivitas Harian</th>
+                                </tr>
+                            </thead>
+                            <tbody id="presensiTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <!-- Dimuat dinamis via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECTION RINGKASAN REKAPITULASI HARIAN (LANGSUNG DITAMPILKAN DI BAWAH) -->
+                <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white flex items-center">
+                                <i class="fa-solid fa-chart-pie text-blue-600 mr-2"></i> Rekapitulasi Presensi & Kehadiran Teknisi
+                            </h2>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Ringkasan total kehadiran masing-masing teknisi hari ini.</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-[10px]">
+                                    <th class="p-3.5">Nama Teknisi</th>
+                                    <th class="p-3.5 text-center">Total Hadir</th>
+                                    <th class="p-3.5 text-center">Total Izin / Sakit</th>
+                                    <th class="p-3.5">Status Keaktifan Terakhir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekapSummaryTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <!-- Dimuat dinamis via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- SECTION DAFTAR PENUGASAN / TIKET PERBAIKAN -->
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6">
-                    <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+                <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
                         <div>
-                            <h2 class="text-sm font-bold text-gray-800 flex items-center">
-                                <i class="fa-solid fa-clipboard-list text-gray-500 mr-2"></i> Daftar Penugasan / Tiket Perbaikan
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white flex items-center">
+                                <i class="fa-solid fa-clipboard-list text-gray-500 dark:text-gray-400 mr-2"></i> Daftar Penugasan / Tiket Perbaikan
                             </h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Monitor tugas perbaikan gangguan internet di lapangan.</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Monitor tugas perbaikan gangguan internet di lapangan.</p>
                         </div>
-                        <button onclick="openModal('penugasanModal')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-semibold border border-gray-300 shadow-sm flex items-center transition">
-                            <i class="fa-solid fa-plus text-blue-600 mr-1.5"></i> Buat Penugasan Baru
+                        <button onclick="openModal('penugasanModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm flex items-center transition">
+                            <i class="fa-solid fa-plus mr-1.5"></i> Buat Penugasan Baru
                         </button>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-600 border-b border-gray-200 uppercase tracking-wider text-[10px]">
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-[10px]">
                                     <th class="p-3.5">Pelanggan</th>
                                     <th class="p-3.5">Kendala / Tugas</th>
                                     <th class="p-3.5">Teknisi Bertugas</th>
@@ -102,7 +244,7 @@
                                     <th class="p-3.5 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="penugasanTableBody" class="divide-y divide-gray-200">
+                            <tbody id="penugasanTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
                                 <!-- Dimuat dinamis via JavaScript -->
                             </tbody>
                         </table>
@@ -114,30 +256,54 @@
 
     <!-- MODAL TAMBAH TEKNISI -->
     <div id="teknisiModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 text-xs">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-user-plus mr-2 text-purple-600"></i> Tambah Teknisi Baru</h3>
-                <button onclick="closeModal('teknisiModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-user-plus mr-2 text-purple-600"></i> Tambah Teknisi Baru</h3>
+                <button onclick="closeModal('teknisiModal')" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Nama Lengkap</label>
-                    <input type="text" id="inputNamaTeknisi" placeholder="Contoh: Joko Widodo" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Nama Lengkap</label>
+                    <input type="text" id="inputNamaTeknisi" placeholder="Contoh: Joko Widodo" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Nomor WhatsApp</label>
-                    <input type="text" id="inputWaTeknisi" placeholder="08123456789" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Nomor WhatsApp</label>
+                    <input type="text" id="inputWaTeknisi" placeholder="08123456789" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Status Awal</label>
-                    <select id="inputStatusTeknisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Status Awal</label>
+                    <select id="inputStatusTeknisi" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                         <option value="Standby">Standby</option>
                         <option value="On Duty">On Duty</option>
                     </select>
                 </div>
-                <div class="flex space-x-2 pt-3">
-                    <button onclick="saveTeknisi()" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold shadow">Simpan Teknisi</button>
-                    <button onclick="closeModal('teknisiModal')" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Batal</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('teknisiModal')" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="button" onclick="saveTeknisi()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold transition flex items-center shadow-sm"><i class="fa-solid fa-check mr-1.5"></i> Simpan Teknisi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRESENSI DENGAN FOTO, TIMESTAMP & KEGIATAN HARIAN -->
+    <div id="presensiModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 id="presensiModalTitle" class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-camera mr-2 text-emerald-600"></i> Absen & Rencana Kegiatan Harian</h3>
+                <button onclick="closeModal('presensiModal')" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Rincian Kegiatan / Tugas Hari Ini</label>
+                    <textarea id="inputPresensiKegiatan" rows="3" placeholder="Contoh: Maintenance ODP Blimbing, penyambungan kabel dropcore pelanggan baru, standby NOC." class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none resize-vertical"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Upload Foto Bukti / Selfie Kehadiran</label>
+                    <input type="file" id="inputPresensiFoto" accept="image/*" required class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700">
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('presensiModal')" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="button" onclick="submitPresensiWithActivity()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center shadow-sm"><i class="fa-solid fa-check mr-1.5"></i> Kirim Absen & Kegiatan</button>
                 </div>
             </div>
         </div>
@@ -145,40 +311,40 @@
 
     <!-- MODAL BUAT PENUGASAN BARU (DENGAN UPLOAD FOTO) -->
     <div id="penugasanModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 text-xs max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-clipboard-check mr-2 text-blue-600"></i> Buat Penugasan & Laporan Foto</h3>
-                <button onclick="closeModal('penugasanModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-clipboard-check mr-2 text-blue-600"></i> Buat Penugasan & Laporan Foto</h3>
+                <button onclick="closeModal('penugasanModal')" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Nama Pelanggan & Lokasi (ODP)</label>
-                    <input type="text" id="inputPelanggan" placeholder="Contoh: Budi Santoso (ODP-BLIMBING-01)" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Nama Pelanggan & Lokasi (ODP)</label>
+                    <input type="text" id="inputPelanggan" placeholder="Contoh: Budi Santoso (ODP-BLIMBING-01)" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Kendala / Tugas</label>
-                    <input type="text" id="inputKendala" placeholder="Contoh: Kabel Dropcore Putus (LOS)" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Kendala / Tugas</label>
+                    <input type="text" id="inputKendala" placeholder="Contoh: Kabel Dropcore Putus (LOS)" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Pilih Teknisi Bertugas</label>
-                    <select id="inputTeknisiTugas" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Pilih Teknisi Bertugas</label>
+                    <select id="inputTeknisiTugas" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                         <!-- Diisi dinamis via JS -->
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Upload Foto Bukti / Kondisi Lapangan</label>
-                    <input type="file" id="inputFotoTugas" accept="image/*" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Upload Foto Bukti / Kondisi Lapangan</label>
+                    <input type="file" id="inputFotoTugas" accept="image/*" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Status Penugasan</label>
-                    <select id="inputStatusTugas" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Status Penugasan</label>
+                    <select id="inputStatusTugas" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                         <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
                         <option value="Selesai">Selesai</option>
                     </select>
                 </div>
-                <div class="flex space-x-2 pt-3">
-                    <button onclick="savePenugasanWithPhoto()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow">Simpan Penugasan</button>
-                    <button onclick="closeModal('penugasanModal')" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Batal</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('penugasanModal')" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="button" onclick="savePenugasanWithPhoto()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition flex items-center shadow-sm"><i class="fa-solid fa-check mr-1.5"></i> Simpan Penugasan</button>
                 </div>
             </div>
         </div>
@@ -186,52 +352,111 @@
 
     <!-- MODAL LAPORAN MANDIRI TEKNISI -->
     <div id="teknisiReportModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white text-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 text-xs">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold flex items-center"><i class="fa-solid fa-camera-retro mr-2 text-blue-600"></i> Form Laporan Pengerjaan Teknisi</h3>
-                <button onclick="closeModal('teknisiReportModal')" class="text-gray-400 hover:text-gray-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-camera-retro mr-2 text-blue-600"></i> Form Laporan Pengerjaan Teknisi</h3>
+                <button onclick="closeModal('teknisiReportModal')" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Catatan / Hasil Perbaikan Lapangan</label>
-                    <textarea id="reportCatatan" rows="3" placeholder="Contoh: Kabel fiber sambung ulang, LOS normal kembali." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 resize-vertical"></textarea>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Catatan / Hasil Perbaikan Lapangan</label>
+                    <textarea id="reportCatatan" rows="3" placeholder="Contoh: Kabel fiber sambung ulang, LOS normal kembali." class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none resize-vertical"></textarea>
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Upload Foto Bukti Perbaikan</label>
-                    <input type="file" id="reportFotoFile" accept="image/*" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Upload Foto Bukti Perbaikan</label>
+                    <input type="file" id="reportFotoFile" accept="image/*" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700">
                 </div>
                 <div>
-                    <label class="block text-gray-600 font-semibold mb-1">Update Status Tiket</label>
-                    <select id="reportStatusUpdate" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Update Status Tiket</label>
+                    <select id="reportStatusUpdate" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                         <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
                         <option value="Selesai">Selesai (Tuntas)</option>
                     </select>
                 </div>
-                <div class="flex space-x-2 pt-3">
-                    <button onclick="submitTeknisiReport()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow">Kirim Laporan</button>
-                    <button onclick="closeModal('teknisiReportModal')" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Batal</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('teknisiReportModal')" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="button" onclick="submitTeknisiReport()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition flex items-center shadow-sm"><i class="fa-solid fa-check mr-1.5"></i> Kirim Laporan</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT MANAJEMEN TEKNISI -->
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- SCRIPT MANAJEMEN TEKNISI & PRESENSI -->
     <script>
-        // Data Teknisi (Persistent LocalStorage)
-        let teknisiList = JSON.parse(localStorage.getItem('meganet_teknisi')) || [
-            { id: 1, name: 'Ahmad Fauzi', wa: '081234567891', status: 'Standby' },
-            { id: 2, name: 'Rian Hidayat', wa: '089876543210', status: 'On Duty' }
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = type === 'success' 
+                ? 'bg-emerald-900/95 border-emerald-700 text-emerald-100' 
+                : 'bg-red-900/95 border-red-700 text-red-100';
+            
+            let iconClass = type === 'success' 
+                ? 'fa-circle-check text-emerald-400' 
+                : 'fa-triangle-exclamation text-red-400';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md text-xs w-80 toast-enter ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base mt-0.5 shrink-0"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-sm mb-0.5">${title}</div>
+                    <div class="text-[11px] opacity-90 leading-relaxed">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meganet_theme', 'light');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meganet_theme', 'dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+        }
+
+        // Data Default Teknisi
+        const defaultTeknisi = [
+            { id: 1, name: 'Ahmad Fauzi', wa: '081234567891', status: 'Standby', lastAttendance: '2026-11-18 08:00:15' },
+            { id: 2, name: 'Rian Hidayat', wa: '089876543210', status: 'On Duty', lastAttendance: '2026-11-18 08:15:30' }
         ];
 
-        // Data Penugasan (Persistent LocalStorage)
+        let teknisiList = JSON.parse(localStorage.getItem('meganet_teknisi')) || defaultTeknisi;
+        let presensiLogs = JSON.parse(localStorage.getItem('meganet_presensi_logs')) || [
+            { time: '2026-11-18 08:00:15', name: 'Ahmad Fauzi', status: 'Hadir', activity: 'Maintenance ODP Blimbing dan pengecekan core OLT.', photo: null }
+        ];
         let penugasanList = JSON.parse(localStorage.getItem('meganet_penugasan')) || [
             { id: 1, pelanggan: 'Budi Santoso', odp: 'ODP-BLIMBING-01', kendala: 'Kabel Dropcore Putus (LOS)', teknisi: 'Rian Hidayat', status: 'Dalam Pengerjaan', photo: null }
         ];
 
+        let currentPresensiTeknisiId = null;
+        let currentPresensiStatus = '';
         let currentReportId = null;
 
         function saveData() {
             localStorage.setItem('meganet_teknisi', JSON.stringify(teknisiList));
+            localStorage.setItem('meganet_presensi_logs', JSON.stringify(presensiLogs));
             localStorage.setItem('meganet_penugasan', JSON.stringify(penugasanList));
         }
 
@@ -246,27 +471,188 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('meganet_theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+            renderTeknisiCards();
+            renderPresensiTable();
+            renderRekapSummary();
+            renderPenugasanTable();
+        });
+
         function renderTeknisiCards() {
             const grid = document.getElementById('teknisiCardGrid');
             grid.innerHTML = '';
 
+            if (teknisiList.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 p-6 text-center text-gray-400 text-xs">Belum ada data teknisi. Silakan klik tombol "Tambah Teknisi" di atas.</div>`;
+                return;
+            }
+
             teknisiList.forEach(tek => {
-                let badgeClass = tek.status === 'Standby' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                let badgeClass = tek.status === 'Standby' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400';
                 grid.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-bold text-gray-900 text-sm">${tek.name}</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${badgeClass}">${tek.status}</span>
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col justify-between space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white text-sm">${tek.name}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-brands fa-whatsapp text-green-600 mr-1"></i> ${tek.wa}</p>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1"><i class="fa-brands fa-whatsapp text-green-600 mr-1"></i> ${tek.wa}</p>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold ${badgeClass}">${tek.status}</span>
                         </div>
-                        <div class="flex items-center space-x-1">
-                            <button onclick="deleteTeknisi(${tek.id})" class="p-2 text-red-500 hover:text-red-700" title="Hapus Teknisi"><i class="fa-solid fa-trash"></i></button>
+                        <div class="text-[11px] text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-2 flex justify-between items-center">
+                            <span>Presensi: <strong class="text-gray-700 dark:text-gray-300">${tek.lastAttendance || '-'}</strong></span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5 pt-1">
+                            <button onclick="promptAttendance(${tek.id}, 'Hadir')" class="py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-xl text-[11px] font-semibold transition" title="Absen Hadir"><i class="fa-solid fa-camera mr-1"></i> Hadir</button>
+                            <button onclick="promptAttendance(${tek.id}, 'Izin / Sakit')" class="py-1.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 text-amber-600 dark:text-amber-400 rounded-xl text-[11px] font-semibold transition" title="Izin"><i class="fa-solid fa-camera mr-1"></i> Izin</button>
+                            <button onclick="deleteTeknisi(${tek.id})" class="py-1.5 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 text-red-600 dark:text-red-400 rounded-xl text-[11px] font-semibold transition" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function promptAttendance(id, statusType) {
+            currentPresensiTeknisiId = id;
+            currentPresensiStatus = statusType;
+            document.getElementById('presensiModalTitle').innerHTML = `<i class="fa-solid fa-camera mr-2 text-emerald-600"></i> Absen ${statusType} & Kegiatan`;
+            document.getElementById('inputPresensiKegiatan').value = statusType === 'Hadir' ? 'Maintenance ODP, perbaikan kabel dropcore, dan standby NOC.' : 'Permohonan izin / sakit';
+            document.getElementById('inputPresensiFoto').value = '';
+            openModal('presensiModal');
+        }
+
+        function submitPresensiWithActivity() {
+            let tek = teknisiList.find(t => t.id === currentPresensiTeknisiId);
+            if(!tek) return;
+
+            const activity = document.getElementById('inputPresensiKegiatan').value.trim() || 'Aktivitas harian teknisi lapangan';
+            const fileInput = document.getElementById('inputPresensiFoto');
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                showToast('Peringatan', 'Foto bukti presensi wajib di-upload!', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+                tek.lastAttendance = now;
+                tek.status = currentPresensiStatus === 'Hadir' ? 'Standby' : 'Izin';
+
+                presensiLogs.unshift({
+                    time: now,
+                    name: tek.name,
+                    status: currentPresensiStatus,
+                    activity: activity,
+                    photo: e.target.result // Foto bukti dengan timestamp
+                });
+
+                saveData();
+                renderTeknisiCards();
+                renderPresensiTable();
+                renderRekapSummary();
+                closeModal('presensiModal');
+                showToast('Presensi Disimpan', `Absen dan ringkasan kegiatan ${tek.name} berhasil direkam.`);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        function renderPresensiTable() {
+            const tbody = document.getElementById('presensiTableBody');
+            tbody.innerHTML = '';
+
+            if(presensiLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada log presensi atau kegiatan harian.</td></tr>`;
+                return;
+            }
+
+            presensiLogs.forEach(log => {
+                let badgeBg = log.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400';
+                
+                let fotoHtml = log.photo 
+                    ? `<div class="relative inline-block"><a href="${log.photo}" target="_blank"><img src="${log.photo}" class="w-12 h-12 object-cover rounded-xl border border-gray-200 dark:border-gray-700 hover:scale-105 transition" title="Klik untuk memperbesar"></a><span class="absolute bottom-0 right-0 bg-black/70 text-white text-[8px] px-1 rounded font-mono">${log.time.slice(11, 16)}</span></div>` 
+                    : '<span class="text-gray-400 italic text-xs">Tanpa Foto</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                        <td class="p-3.5 text-xs font-mono text-gray-500 font-semibold"><i class="fa-regular fa-clock mr-1 text-emerald-600"></i> ${log.time}</td>
+                        <td class="p-3.5 font-bold text-gray-800 dark:text-white">${log.name}</td>
+                        <td class="p-3.5">${fotoHtml}</td>
+                        <td class="p-3.5"><span class="px-2.5 py-1 ${badgeBg} rounded-full font-semibold text-[10px]">${log.status}</span></td>
+                        <td class="p-3.5 text-gray-700 dark:text-gray-300 text-xs font-medium leading-relaxed">${log.activity}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Render Tabel Rekap Summary Harian Langsung di Layar
+        function renderRekapSummary() {
+            const tbody = document.getElementById('rekapSummaryTableBody');
+            tbody.innerHTML = '';
+
+            if (teknisiList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">Belum ada data rekap teknisi.</td></tr>`;
+                return;
+            }
+
+            teknisiList.forEach(tek => {
+                // Hitung total hadir dan izin dari presensiLogs berdasarkan nama teknisi
+                let totalHadir = presensiLogs.filter(l => l.name === tek.name && l.status === 'Hadir').length;
+                let totalIzin = presensiLogs.filter(l => l.name === tek.name && l.status !== 'Hadir').length;
+
+                let statusBadge = tek.status === 'Standby' 
+                    ? '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 rounded-full font-semibold text-[10px]">Standby / Aktif</span>' 
+                    : '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 rounded-full font-semibold text-[10px]">Izin / Sakit</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                        <td class="p-3.5 font-bold text-gray-900 dark:text-white">${tek.name}</td>
+                        <td class="p-3.5 text-center font-bold text-emerald-600">${totalHadir}</td>
+                        <td class="p-3.5 text-center font-bold text-amber-600">${totalIzin}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function exportPresensiCSV() {
+            if(presensiLogs.length === 0) {
+                showToast('Kosong', 'Tidak ada data presensi untuk di-export.', 'error');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Nama Teknisi,Status,Kegiatan\n";
+            presensiLogs.forEach(log => {
+                let row = `"${log.time}","${log.name}","${log.status}","${log.activity.replace(/"/g, '""')}"`;
+                csvContent += row + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `rekap_presensi_teknisi_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Export Berhasil', 'File CSV rekap kegiatan berhasil diunduh!');
+        }
+
+        function clearPresensiLogs() {
+            if(confirm('Yakin ingin mereset seluruh log presensi dan kegiatan?')) {
+                presensiLogs = [];
+                saveData();
+                renderPresensiTable();
+                renderRekapSummary();
+                showToast('Dibersihkan', 'Log presensi berhasil dikosongkan.', 'error');
+            }
         }
 
         function renderPenugasanTable() {
@@ -278,29 +664,29 @@
                 return;
             }
 
-            penugasanList.forEach((tugas, index) => {
+            penugasanList.forEach((tugas) => {
                 let statusBadge = tugas.status === 'Selesai' 
-                    ? '<span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-[10px]">Selesai</span>' 
-                    : '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full font-semibold text-[10px]">Dalam Pengerjaan</span>';
+                    ? '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 rounded-full font-semibold text-[10px]">Selesai</span>' 
+                    : '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 rounded-full font-semibold text-[10px]">Dalam Pengerjaan</span>';
 
                 let fotoHtml = tugas.photo 
-                    ? `<a href="${tugas.photo}" target="_blank"><img src="${tugas.photo}" class="w-10 h-10 object-cover rounded-lg border border-gray-200 hover:scale-105 transition" title="Klik untuk memperbesar foto"></a>` 
-                    : '<span class="text-gray-400 italic">Belum ada foto</span>';
+                    ? `<a href="${tugas.photo}" target="_blank"><img src="${tugas.photo}" class="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition" title="Klik untuk memperbesar foto"></a>` 
+                    : '<span class="text-gray-400 italic text-xs">Belum ada foto</span>';
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
                         <td class="p-3.5">
-                            <span class="font-bold text-gray-900 block">${tugas.pelanggan}</span>
+                            <span class="font-bold text-gray-900 dark:text-white block">${tugas.pelanggan}</span>
                             <span class="text-gray-500 text-[11px]">${tugas.odp}</span>
                         </td>
-                        <td class="p-3.5 text-gray-700 font-medium">${tugas.kendala}</td>
-                        <td class="p-3.5 text-gray-600"><i class="fa-solid fa-user-gear text-purple-600 mr-1"></i> ${tugas.teknisi}</td>
+                        <td class="p-3.5 text-gray-700 dark:text-gray-300 font-medium">${tugas.kendala}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-400"><i class="fa-solid fa-user-gear text-purple-600 mr-1"></i> ${tugas.teknisi}</td>
                         <td class="p-3.5">${fotoHtml}</td>
                         <td class="p-3.5">${statusBadge}</td>
                         <td class="p-3.5 text-center space-x-1">
-                            <button onclick="openTeknisiReportModal(${tugas.id})" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[11px] font-semibold transition" title="Teknisi Lapor & Foto"><i class="fa-solid fa-camera mr-1"></i> Lapor</button>
-                            <button onclick="toggleStatus(${tugas.id})" class="p-1.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition" title="Ubah Status"><i class="fa-solid fa-check"></i></button>
-                            <button onclick="deletePenugasan(${tugas.id})" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition" title="Hapus Tiket"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="openTeknisiReportModal(${tugas.id})" class="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-xl text-[11px] font-semibold transition" title="Teknisi Lapor & Foto"><i class="fa-solid fa-camera mr-1"></i> Lapor</button>
+                            <button onclick="toggleStatus(${tugas.id})" class="p-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-xl transition" title="Ubah Status"><i class="fa-solid fa-check"></i></button>
+                            <button onclick="deletePenugasan(${tugas.id})" class="p-2 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 text-red-600 dark:text-red-400 rounded-xl transition" title="Hapus Tiket"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -321,15 +707,16 @@
             const status = document.getElementById('inputStatusTeknisi').value;
 
             if(!name || !wa) {
-                alert('Nama dan nomor WhatsApp teknisi wajib diisi!');
+                showToast('Peringatan', 'Nama dan nomor WhatsApp teknisi wajib diisi!', 'error');
                 return;
             }
 
-            teknisiList.push({ id: Date.now(), name, wa, status });
+            teknisiList.push({ id: Date.now(), name, wa, status, lastAttendance: '-' });
             saveData();
             renderTeknisiCards();
+            renderRekapSummary();
             closeModal('teknisiModal');
-            alert('Teknisi baru berhasil ditambahkan!');
+            showToast('Berhasil', 'Teknisi baru berhasil ditambahkan.');
         }
 
         function deleteTeknisi(id) {
@@ -337,6 +724,8 @@
                 teknisiList = teknisiList.filter(t => t.id !== id);
                 saveData();
                 renderTeknisiCards();
+                renderRekapSummary();
+                showToast('Dihapus', 'Data teknisi dihapus.', 'error');
             }
         }
 
@@ -348,7 +737,7 @@
             const fileInput = document.getElementById('inputFotoTugas');
 
             if(!rawPelanggan || !kendala) {
-                alert('Nama pelanggan dan kendala wajib diisi!');
+                showToast('Peringatan', 'Nama pelanggan dan kendala wajib diisi!', 'error');
                 return;
             }
 
@@ -377,7 +766,7 @@
             saveData();
             renderPenugasanTable();
             closeModal('penugasanModal');
-            alert('Penugasan perbaikan berhasil dibuat!');
+            showToast('Berhasil', 'Penugasan perbaikan berhasil dibuat.');
         }
 
         function openTeknisiReportModal(id) {
@@ -387,7 +776,7 @@
                 document.getElementById('reportCatatan').value = tugas.kendala || '';
                 document.getElementById('reportStatusUpdate').value = tugas.status || 'Dalam Pengerjaan';
                 document.getElementById('reportFotoFile').value = '';
-                document.getElementById('teknisiReportModal').classList.remove('hidden');
+                openModal('teknisiReportModal');
             }
         }
 
@@ -408,7 +797,7 @@
                     saveData();
                     renderPenugasanTable();
                     closeModal('teknisiReportModal');
-                    alert('Laporan dan foto bukti berhasil dikirim oleh teknisi!');
+                    showToast('Berhasil', 'Laporan dan foto bukti berhasil dikirim!');
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
@@ -417,7 +806,7 @@
                 saveData();
                 renderPenugasanTable();
                 closeModal('teknisiReportModal');
-                alert('Laporan berhasil diperbarui!');
+                showToast('Berhasil', 'Laporan berhasil diperbarui!');
             }
         }
 
@@ -427,6 +816,7 @@
                 tugas.status = tugas.status === 'Dalam Pengerjaan' ? 'Selesai' : 'Dalam Pengerjaan';
                 saveData();
                 renderPenugasanTable();
+                showToast('Status Diperbarui', `Status tiket diubah menjadi ${tugas.status}.`);
             }
         }
 
@@ -435,12 +825,9 @@
                 penugasanList = penugasanList.filter(t => t.id !== id);
                 saveData();
                 renderPenugasanTable();
+                showToast('Dihapus', 'Tiket penugasan dihapus.', 'error');
             }
         }
-
-        // Inisialisasi awal saat halaman dibuka
-        renderTeknisiCards();
-        renderPenugasanTable();
     </script>
 </body>
 </html>
