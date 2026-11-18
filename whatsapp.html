@@ -1,111 +1,402 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WhatsApp Gateway - MEGANET FTTH MONITORING</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: { colors: { meganet: { red: '#DC2626', darkred: '#991B1B', lightred: '#FEF2F2' } } }
             }
         }
     </script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        @media screen and (max-width: 768px) {
+            input[type="text"], input[type="search"], select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('meganet_theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+<body class="bg-gray-100 dark:bg-[#0f172a] font-sans antialiased text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-200">
+    <div class="flex h-screen w-screen overflow-hidden relative">
+        
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <aside id="appSidebar" class="w-64 bg-white dark:bg-[#1e293b] border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="h-14 sm:h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-xl sm:text-2xl mr-2.5 shrink-0"></i>
+                    <span class="text-base sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-2 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
             
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard</a>
+            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto text-xs sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Dashboard</span>
+                </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT</a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU</a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network</a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring OLT</span>
+                </a>
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring ONU</span>
+                </a>
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Traffic Network</span>
+                </a>
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Peta Jaringan</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-microchip w-5 mr-3"></i> GenieACS</a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-address-book w-5 mr-3"></i> Data Pelanggan</a>
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-tags w-5 mr-3"></i> Paket Internet</a>
-                <!-- MENU WHATSAPP AKTIF -->
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red"><i class="fa-brands fa-whatsapp w-5 mr-3"></i> WhatsApp Gateway</a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-user-gear w-5 mr-3"></i> Manajemen Teknisi</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-sm shrink-0"></i> <span class="ml-2.5">GenieACS</span>
+                </a>
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-sm shrink-0"></i> <span class="ml-2.5">Data Pelanggan</span>
+                </a>
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-sm shrink-0"></i> <span class="ml-2.5">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-3 py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red dark:bg-meganet-red/20 dark:text-red-400 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-sm shrink-0"></i> <span class="ml-2.5">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-sm shrink-0"></i> <span class="ml-2.5">Manajemen Teknisi</span>
+                </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert</a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900"><i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan</a>
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Pengaturan</span>
+                </a>
             </nav>
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+
+            <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-                <h1 class="text-lg font-semibold text-gray-800">WhatsApp Gateway & Broadcast</h1>
-                <div class="flex items-center space-x-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full"><i class="fa-solid fa-circle text-[8px] mr-1"></i> WA Connected</span>
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50 dark:bg-[#0f172a]">
+            
+            <!-- TOPBAR -->
+            <header class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-30 shadow-xs shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="text-gray-700 dark:text-gray-200 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white uppercase tracking-wide">WhatsApp Gateway & Broadcast</h1>
+                </div>
+
+                <div class="flex items-center space-x-3 text-xs sm:text-sm">
+                    <span id="waStatusBadge" class="px-3 py-1.5 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded-full flex items-center shadow-xs">
+                        <i class="fa-solid fa-circle text-[8px] mr-1.5 animate-pulse"></i> WA Connected
+                    </span>
+                    <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2.5 rounded-lg transition" title="Ganti Tema">
+                        <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- FORM KIRIM PESAN -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 md:col-span-1 space-y-4">
-                    <h2 class="font-semibold text-gray-800 border-b pb-3"><i class="fa-regular fa-paper-plane mr-2 text-red-600"></i> Kirim Pesan / Tagihan</h2>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Nomor WhatsApp Tujuan</label>
-                        <input type="text" placeholder="Contoh: 628123456789" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+            <!-- KONTEN UTAMA -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 space-y-6">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- KOTAK QR CODE WHATSAPP -->
+                    <div class="bg-white dark:bg-[#1e293b] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col items-center text-center justify-between">
+                        <div class="w-full">
+                            <h2 class="font-bold text-gray-800 dark:text-white text-sm sm:text-base flex items-center justify-center mb-1">
+                                <i class="fa-brands fa-whatsapp text-green-600 mr-2 text-lg"></i> Perangkat WhatsApp
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Scan QR Code untuk menghubungkan nomor gateway.</p>
+                        </div>
+
+                        <!-- Area Barcode / QR Code Asli -->
+                        <div class="my-5 p-3 bg-white rounded-2xl shadow-inner border border-gray-200 dark:border-gray-800 flex items-center justify-center relative w-48 h-48">
+                            <div id="qrcode" class="flex items-center justify-center"></div>
+                            
+                            <!-- Overlay Status Terhubung -->
+                            <div id="connectedOverlay" class="absolute inset-0 bg-white/95 dark:bg-[#1e293b]/95 rounded-2xl flex flex-col items-center justify-center p-3">
+                                <i class="fa-solid fa-circle-check text-green-600 text-4xl mb-2"></i>
+                                <span class="text-xs font-bold text-gray-800 dark:text-white">Terhubung</span>
+                                <span class="text-[10px] text-gray-500 mt-0.5">+62 812-3456-7890</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full space-y-2">
+                            <button onclick="refreshQrCode()" class="w-full py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition flex items-center justify-center">
+                                <i class="fa-solid fa-rotate mr-1.5"></i> Refresh QR Code
+                            </button>
+                            <button onclick="disconnectWa()" class="w-full py-2 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 text-red-600 dark:text-red-400 rounded-xl text-xs font-medium transition flex items-center justify-center">
+                                <i class="fa-solid fa-power-off mr-1.5"></i> Putuskan Koneksi (Disconnect)
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Isi Pesan</label>
-                        <textarea rows="4" placeholder="Halo, tagihan internet Anda bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+
+                    <!-- FORM KIRIM PESAN -->
+                    <div class="bg-white dark:bg-[#1e293b] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs lg:col-span-2 space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h2 class="font-bold text-gray-800 dark:text-white text-sm sm:text-base border-b border-gray-100 dark:border-gray-800 pb-3 flex items-center">
+                                <i class="fa-regular fa-paper-plane mr-2 text-red-600"></i> Kirim Pesan / Broadcast Tagihan
+                            </h2>
+                            <div class="space-y-3 mt-4">
+                                <div>
+                                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Nomor WhatsApp Tujuan</label>
+                                    <input type="text" id="waRecipient" placeholder="Contoh: 628123456789" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Isi Pesan</label>
+                                    <textarea id="waMessage" rows="4" placeholder="Halo, tagihan internet Anda bulan ini..." class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none resize-vertical"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="sendWhatsAppMessage()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm flex items-center justify-center">
+                            <i class="fa-brands fa-whatsapp mr-2 text-base"></i> Kirim Pesan Sekarang
+                        </button>
                     </div>
-                    <button onclick="alert('Pesan berhasil dikirim!')" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                        <i class="fa-brands fa-whatsapp mr-1"></i> Kirim Pesan Sekarang
-                    </button>
+
                 </div>
 
                 <!-- TABEL RIWAYAT / LOG PENGIRIMAN -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 md:col-span-2 overflow-hidden flex flex-col">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 class="font-semibold text-gray-800 text-sm">Riwayat Log Pesan Terkirim</h2>
+                <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
+                        <h2 class="font-bold text-gray-800 dark:text-white text-xs sm:text-sm">Riwayat Log Pesan Terkirim</h2>
+                        <button onclick="clearLog()" class="text-xs text-red-600 hover:underline"><i class="fa-solid fa-trash mr-1"></i> Bersihkan Log</button>
                     </div>
-                    <div class="flex-1 overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead>
-                                <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                    <th class="p-4 font-semibold">Waktu</th>
-                                    <th class="p-4 font-semibold">Penerima</th>
-                                    <th class="p-4 font-semibold">Pesan</th>
-                                    <th class="p-4 font-semibold">Status</th>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 uppercase tracking-wider text-[10px]">
+                                    <th class="p-3.5">Waktu</th>
+                                    <th class="p-3.5">Penerima</th>
+                                    <th class="p-3.5">Pesan</th>
+                                    <th class="p-3.5">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 text-sm">
-                                <tr>
-                                    <td class="p-4 text-xs text-gray-500">2026-11-04 21:00</td>
-                                    <td class="p-4 font-medium text-gray-800">081234567890</td>
-                                    <td class="p-4 text-gray-600 truncate max-w-xs">Halo Budi, tagihan internet Meganet bulan ini sudah terbit...</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Sent</span></td>
-                                </tr>
+                            <tbody id="waLogTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <!-- Log dinamis -->
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </main>
         </div>
     </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = type === 'success' 
+                ? 'bg-emerald-900/95 border-emerald-700 text-emerald-100' 
+                : 'bg-red-900/95 border-red-700 text-red-100';
+            
+            let iconClass = type === 'success' 
+                ? 'fa-circle-check text-emerald-400' 
+                : 'fa-triangle-exclamation text-red-400';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md text-xs w-80 toast-enter ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base mt-0.5 shrink-0"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-sm mb-0.5">${title}</div>
+                    <div class="text-[11px] opacity-90 leading-relaxed">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meganet_theme', 'light');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meganet_theme', 'dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+        }
+
+        // Inisialisasi QR Code Asli
+        let qrInstance = null;
+        function generateQrCode() {
+            const container = document.getElementById("qrcode");
+            container.innerHTML = "";
+            qrInstance = new QRCode(container, {
+                text: "https://wa.me/meganet-gateway-session-" + Date.now(),
+                width: 140,
+                height: 140,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('meganet_theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+            generateQrCode();
+            renderLogs();
+        });
+
+        let isConnected = JSON.parse(localStorage.getItem('meganet_wa_connected')) ?? true;
+        let waLogs = JSON.parse(localStorage.getItem('meganet_wa_logs')) || [
+            { time: '2026-11-04 21:00', recipient: '081234567890', message: 'Halo Budi, tagihan internet Meganet bulan ini sudah terbit...', status: 'Sent' }
+        ];
+
+        function updateWaUI() {
+            const overlay = document.getElementById('connectedOverlay');
+            const badge = document.getElementById('waStatusBadge');
+            
+            if (isConnected) {
+                overlay.classList.remove('hidden');
+                badge.className = 'px-3 py-1.5 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded-full flex items-center shadow-xs';
+                badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] mr-1.5 animate-pulse"></i> WA Connected`;
+            } else {
+                overlay.classList.add('hidden');
+                badge.className = 'px-3 py-1.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 rounded-full flex items-center shadow-xs';
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[8px] mr-1.5"></i> Menunggu Scan QR`;
+            }
+            localStorage.setItem('meganet_wa_connected', JSON.stringify(isConnected));
+        }
+
+        function refreshQrCode() {
+            isConnected = false;
+            generateQrCode();
+            updateWaUI();
+            showToast('QR Code Diperbarui', 'Silakan scan QR code baru menggunakan aplikasi WhatsApp Anda.');
+        }
+
+        function disconnectWa() {
+            isConnected = false;
+            updateWaUI();
+            showToast('Terputus', 'Koneksi WhatsApp Gateway berhasil diputuskan.', 'error');
+        }
+
+        function sendWhatsAppMessage() {
+            const recipient = document.getElementById('waRecipient').value.trim();
+            const message = document.getElementById('waMessage').value.trim();
+
+            if (!recipient || !message) {
+                showToast('Peringatan', 'Nomor tujuan dan isi pesan wajib diisi!', 'error');
+                return;
+            }
+
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            waLogs.unshift({ time: now, recipient, message, status: 'Sent' });
+            localStorage.setItem('meganet_wa_logs', JSON.stringify(waLogs));
+
+            renderLogs();
+            document.getElementById('waRecipient').value = '';
+            document.getElementById('waMessage').value = '';
+            showToast('Berhasil', 'Pesan WhatsApp berhasil dikirim ke antrean gateway!');
+        }
+
+        function renderLogs() {
+            const tbody = document.getElementById('waLogTableBody');
+            tbody.innerHTML = '';
+
+            if (waLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">Belum ada riwayat pesan terkirim.</td></tr>`;
+                return;
+            }
+
+            waLogs.forEach(log => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                        <td class="p-3.5 text-xs text-gray-500">${log.time}</td>
+                        <td class="p-3.5 font-medium text-gray-800 dark:text-white">${log.recipient}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300 truncate max-w-xs">${log.message}</td>
+                        <td class="p-3.5"><span class="px-2.5 py-1 bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded-full font-semibold text-[10px]">Sent</span></td>
+                    </tr>
+                `;
+            });
+            updateWaUI();
+        }
+
+        function clearLog() {
+            if (confirm('Yakin ingin menghapus seluruh riwayat log pesan?')) {
+                waLogs = [];
+                localStorage.setItem('meganet_wa_logs', JSON.stringify(waLogs));
+                renderLogs();
+                showToast('Dibersihkan', 'Riwayat log berhasil dikosongkan.', 'error');
+            }
+        }
+    </script>
 </body>
 </html>
