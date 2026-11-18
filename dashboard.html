@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - MEGANET FTTH MONITORING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -25,253 +26,333 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media screen and (max-width: 768px) {
+            input[type="text"], input[type="search"], select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
+<body class="bg-gray-100 dark:bg-[#0f172a] font-sans antialiased text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-200">
 
-    <div class="flex h-screen overflow-hidden relative">
+    <div class="flex h-screen w-screen overflow-hidden relative">
 
-        <!-- SIDEBAR (Responsif untuk HP & PC) -->
-        <aside id="mobileSidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-white border-r border-gray-200 flex flex-col z-50 md:relative md:flex">
-            <!-- Logo Brand -->
-            <div class="h-16 flex items-center justify-between px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <div class="flex items-center">
-                    <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                    <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <!-- SIDEBAR -->
+        <aside id="appSidebar" class="w-64 bg-white dark:bg-[#1e293b] border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            
+            <!-- Header Sidebar -->
+            <div class="h-14 sm:h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-xl sm:text-2xl mr-2.5 shrink-0"></i>
+                    <span class="text-base sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
                 </div>
-                <!-- Tombol Close Sidebar khusus HP -->
-                <button onclick="toggleSidebar()" class="md:hidden text-white text-lg focus:outline-none">
-                    <i class="fa-solid fa-xmark"></i>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-2 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-base"></i>
                 </button>
             </div>
-
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red">
-                    <i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard
+            
+            <!-- Navigasi Menu -->
+            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto text-xs sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-3 py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red dark:bg-meganet-red/20 dark:text-red-400 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Dashboard</span>
                 </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring OLT</span>
                 </a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring ONU</span>
                 </a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Traffic Network</span>
                 </a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan
-                </a>
-
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS
-                </a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan
-                </a>
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet
-                </a>
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway
-                </a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Peta Jaringan</span>
                 </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-sm shrink-0"></i> <span class="ml-2.5">GenieACS</span>
                 </a>
-                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-sm shrink-0"></i> <span class="ml-2.5">Data Pelanggan</span>
                 </a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-sm shrink-0"></i> <span class="ml-2.5">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-sm shrink-0"></i> <span class="ml-2.5">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-sm shrink-0"></i> <span class="ml-2.5">Manajemen Teknisi</span>
+                </a>
+
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Pengaturan</span>
                 </a>
             </nav>
 
-            <!-- Sidebar Footer -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+            <!-- Bagian Bawah: Keluar -->
+            <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
-        <!-- Overlay Gelap saat Sidebar HP Terbuka -->
-        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
-        <!-- MAIN CONTENT CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden w-full">
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50 dark:bg-[#0f172a]">
 
             <!-- TOPBAR -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 z-10">
-                <div class="flex items-center">
-                    <!-- Tombol Hamburger Menu khusus HP -->
-                    <button onclick="toggleSidebar()" class="text-gray-600 md:hidden mr-3 focus:outline-none p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                        <i class="fa-solid fa-bars text-lg"></i>
+            <header class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-30 shadow-xs shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="text-gray-700 dark:text-gray-200 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
                     </button>
-                    <h1 class="text-base md:text-lg font-semibold text-gray-800 truncate">Dashboard Utama</h1>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white uppercase tracking-wide">Dashboard Utama</h1>
                 </div>
 
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <!-- Global Search -->
-                    <div class="relative hidden sm:block">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
-                        </span>
-                        <input type="text" placeholder="Cari ONU / Pelanggan..." class="w-48 md:w-64 pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-meganet-red focus:border-transparent">
+                <div class="flex items-center space-x-2 md:space-x-3 text-xs sm:text-sm">
+                    <div class="hidden lg:flex items-center bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-lg font-medium">
+                        <i class="fa-solid fa-circle-check mr-1.5 text-xs"></i> <span id="systemStatusText">DB & Mikrotik Connected</span>
                     </div>
 
-                    <!-- Notification Badge -->
-                    <a href="alerts.html" class="relative p-2 text-gray-600 hover:text-red-600 transition">
-                        <i class="fa-regular fa-bell text-xl"></i>
-                        <span class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">3</span>
-                    </a>
+                    <div class="hidden sm:flex items-center bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-gray-700 dark:text-gray-300">
+                        <i class="fa-regular fa-clock mr-2 text-gray-400"></i> <span id="liveClock">--:--:--</span>
+                    </div>
 
-                    <!-- User Profile -->
-                    <div class="flex items-center space-x-2 md:space-x-3 border-l pl-3 md:pl-4 border-gray-200">
-                        <div class="w-8 h-8 md:w-9 md:h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs md:text-sm">
+                    <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2.5 rounded-lg transition" title="Ganti Tema Gelap/Terang">
+                        <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+
+                    <div class="flex items-center space-x-2 border-l pl-3 border-gray-200 dark:border-gray-700">
+                        <div class="w-8 h-8 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs">
                             AD
                         </div>
-                        <div class="hidden sm:block text-left">
-                            <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
-                            <p class="text-xs text-gray-500 mt-1">Administrator</p>
-                        </div>
+                        <span class="hidden sm:inline font-semibold text-gray-700 dark:text-gray-200">Admin</span>
                     </div>
                 </div>
             </header>
 
             <!-- SCROLLABLE CONTENT AREA -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-[#0f172a] p-3 sm:p-4 space-y-4">
 
-                <!-- KPI CARDS GRID -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-                    <!-- Card 1 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pelanggan</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-customers" class="text-2xl font-bold text-gray-800">0</span>
-                            <span class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-users"></i></span>
+                <!-- ROW 1: GRAFIK TRAFIK MIKROTIK & STATISTIK CLIENT -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    
+                    <!-- Grafik Traffic Mikrotik (Col 7) -->
+                    <div class="lg:col-span-7 bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-1 bg-green-500 text-white rounded text-[10px] font-bold animate-pulse">LIVE</span>
+                                <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase">Grafik Traffic Mikrotik</h2>
+                            </div>
+                            <select id="routerSelect" onchange="changeRouterTraffic(this.value)" class="text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 focus:outline-none">
+                                <option value="core1">MEGANET-CORE-V4</option>
+                                <option value="gateway1">GW-DISTRIBUSI-01</option>
+                            </select>
                         </div>
-                    </div>
-                    <!-- Card 2 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">ONU Online</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-online" class="text-2xl font-bold text-green-600">0</span>
-                            <span class="p-2 bg-green-50 text-green-600 rounded-lg"><i class="fa-solid fa-circle-check"></i></span>
-                        </div>
-                    </div>
-                    <!-- Card 3 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">ONU Offline</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-offline" class="text-2xl font-bold text-red-600">0</span>
-                            <span class="p-2 bg-red-50 text-red-600 rounded-lg"><i class="fa-solid fa-circle-xmark"></i></span>
-                        </div>
-                    </div>
-                    <!-- Card 4 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">OLT Status</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-olt" class="text-2xl font-bold text-gray-800">0 / 0</span>
-                            <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-server"></i></span>
-                        </div>
-                    </div>
-                    <!-- Card 5 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">ONU LOS</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-los" class="text-2xl font-bold text-amber-500">0</span>
-                            <span class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-triangle-exclamation"></i></span>
-                        </div>
-                    </div>
-                    <!-- Card 6 -->
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Gangguan Aktif</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="kpi-alerts" class="text-2xl font-bold text-red-600">0</span>
-                            <span class="p-2 bg-red-50 text-red-600 rounded-lg"><i class="fa-solid fa-bell"></i></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CHARTS SECTION -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Chart 1 -->
-                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-base font-bold text-gray-800">Statistik Pelanggan Online / Offline</h2>
-                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Realtime Database</span>
-                        </div>
-                        <div class="relative h-64">
-                            <canvas id="onuChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 2 -->
-                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-base font-bold text-gray-800">Trafik Jaringan Uplink / MikroTik</h2>
-                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Realtime</span>
-                        </div>
-                        <div class="relative h-64">
+                        <div class="relative h-48 sm:h-52">
                             <canvas id="trafficChart"></canvas>
                         </div>
+                        <div class="grid grid-cols-3 gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-center">
+                            <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
+                                <p class="text-[10px] text-gray-400 uppercase font-semibold">Hari Ini</p>
+                                <p id="traffic-today" class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white mt-0.5">0 GB</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
+                                <p class="text-[10px] text-gray-400 uppercase font-semibold">Minggu Ini</p>
+                                <p id="traffic-week" class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white mt-0.5">0 TB</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
+                                <p class="text-[10px] text-gray-400 uppercase font-semibold">Bulan Ini</p>
+                                <p id="traffic-month" class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white mt-0.5">0 TB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistik Client & Keuangan (Col 5) -->
+                    <div class="lg:col-span-5 grid grid-cols-1 gap-4">
+                        <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                                <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-users mr-2 text-blue-500"></i> Statistik Client</h2>
+                                <span class="text-xs font-semibold text-gray-400">Total: <strong id="kpi-total" class="text-gray-800 dark:text-white">0</strong></span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 text-center mb-3">
+                                <div class="bg-green-50 dark:bg-green-950/40 p-2 rounded-lg border border-green-200 dark:border-green-900">
+                                    <span class="text-[9px] text-green-600 dark:text-green-400 font-semibold uppercase block">Online</span>
+                                    <span id="kpi-online" class="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">0</span>
+                                </div>
+                                <div class="bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200 dark:border-amber-900">
+                                    <span class="text-[9px] text-amber-600 dark:text-amber-400 font-semibold uppercase block">Isolir</span>
+                                    <span id="kpi-isolir" class="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">0</span>
+                                </div>
+                                <div class="bg-red-50 dark:bg-red-950/40 p-2 rounded-lg border border-red-200 dark:border-red-900">
+                                    <span class="text-[9px] text-red-600 dark:text-red-400 font-semibold uppercase block">Offline</span>
+                                    <span id="kpi-offline" class="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">0</span>
+                                </div>
+                                <div class="bg-blue-50 dark:bg-blue-950/40 p-2 rounded-lg border border-blue-200 dark:border-blue-900">
+                                    <span class="text-[9px] text-blue-600 dark:text-blue-400 font-semibold uppercase block">Total</span>
+                                    <span id="kpi-total-box" class="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">0</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800/60">
+                                    <span><i class="fa-solid fa-network-wired text-blue-500 mr-2"></i> Mikrotik Router</span>
+                                    <span id="stat-mikrotik-count" class="font-bold text-gray-800 dark:text-white">1 Unit</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800/60">
+                                    <span><i class="fa-solid fa-server text-emerald-500 mr-2"></i> OLT Terdaftar</span>
+                                    <span id="stat-olt-count" class="font-bold text-gray-800 dark:text-white">1 OLT</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span><i class="fa-solid fa-box text-red-500 mr-2"></i> ODP & Kabel Fiber</span>
+                                    <span id="stat-odp-count" class="font-bold text-gray-800 dark:text-white">3 ODP (1.1 KM)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Keuangan Bulan Ini</p>
+                                <p id="financial-total" class="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">Rp 0</p>
+                                <p id="financial-ratio" class="text-[10px] sm:text-xs text-gray-500">Profit Rasio 0%</p>
+                            </div>
+                            <div class="p-3.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                                <i class="fa-solid fa-wallet text-xl"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- BOTTOM SECTION: LATEST ALERTS TABLE -->
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                        <h2 class="text-base font-bold text-gray-800">Daftar Gangguan Terbaru</h2>
-                        <a href="alerts.html" class="text-sm font-medium text-red-600 hover:underline">Lihat Semua <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                <!-- ROW 2: STATUS MIKROTIK, STATISTIK PORT, & STATUS SERVER -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- Status Mikrotik -->
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-microchip mr-2 text-indigo-500"></i> Status Mikrotik</h2>
+                            <span id="mikrotik-status-badge" class="px-2.5 py-1 bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded text-[10px] font-bold">ONLINE</span>
+                        </div>
+                        <div class="space-y-2 text-xs sm:text-sm">
+                            <div class="flex justify-between"><span class="text-gray-400">Identity:</span> <span id="mk-identity" class="font-semibold text-gray-800 dark:text-white">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">IP Address:</span> <span id="mk-ip" class="font-mono text-gray-800 dark:text-white">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Uptime:</span> <span id="mk-uptime" class="font-semibold text-gray-800 dark:text-white">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">CPU Load:</span> <span id="mk-cpu" class="font-semibold text-emerald-600">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Statistik Port OLT / ODP -->
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-ethernet mr-2 text-amber-500"></i> Statistik Port OLT</h2>
+                            <span id="port-ratio-text" class="text-xs text-gray-400 font-bold">0 / 0 Terpakai</span>
+                        </div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-3 overflow-hidden">
+                            <div id="port-progress-bar" class="bg-meganet-red h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div class="space-y-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between"><span>Kapasitas Terpakai:</span> <span id="port-percentage" class="font-bold text-gray-800 dark:text-white">0%</span></div>
+                            <div class="flex justify-between"><span>ODP Kritis (Sisa 0-1):</span> <span id="odp-critical" class="font-bold text-red-500">0 ODP</span></div>
+                            <div class="flex justify-between"><span>ODP Hampir Penuh:</span> <span id="odp-warning" class="font-bold text-amber-500">0 ODP</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Status Server NOC -->
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-server mr-2 text-purple-500"></i> Status Server NOC</h2>
+                            <span id="server-status-badge" class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 rounded text-[10px] font-bold">NORMAL</span>
+                        </div>
+                        <div class="space-y-2 text-xs sm:text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">CPU (VM):</span>
+                                <div class="w-28 bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                                    <div id="srv-cpu-bar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="srv-cpu-text" class="font-bold text-gray-800 dark:text-white">0%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">RAM:</span>
+                                <div class="w-28 bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                                    <div id="srv-ram-bar" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="srv-ram-text" class="font-bold text-gray-800 dark:text-white">0%</span>
+                            </div>
+                            <div class="flex justify-between"><span class="text-gray-400">Suhu:</span> <span id="srv-temp" class="font-semibold text-emerald-600">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Uptime:</span> <span id="srv-uptime" class="font-semibold text-gray-800 dark:text-white">-</span></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ROW 3: PAKET TERLARIS & TIKET TEKNISI -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-tags mr-2 text-amber-500"></i> Paket Internet Terlaris</h2>
+                            <a href="packages.html" class="text-xs text-meganet-red hover:underline font-semibold">Kelola Paket</a>
+                        </div>
+                        <div id="topPackagesContainer" class="space-y-2.5 text-xs sm:text-sm">
+                            <div class="text-center text-gray-400 py-3">Memuat data paket...</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-user-gear mr-2 text-purple-500"></i> Status Tiket Teknisi Lapangan</h2>
+                            <a href="teknisi.html" class="text-xs text-meganet-red hover:underline font-semibold">Manajemen Teknisi</a>
+                        </div>
+                        <div id="technicianTicketsContainer" class="space-y-2.5 text-xs sm:text-sm">
+                            <div class="text-center text-gray-400 py-3">Memuat tiket teknisi...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 4: LOG GANGGUAN TERBARU -->
+                <div class="bg-white dark:bg-[#1e293b] rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-white uppercase"><i class="fa-solid fa-triangle-exclamation mr-2 text-red-500"></i> Log Gangguan & Sistem Terkini</h2>
+                            <span id="alert-count-badge" class="text-xs bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400 px-2.5 py-0.5 rounded font-semibold">0 Active Alert</span>
+                        </div>
+                        <a href="alerts.html" class="text-xs sm:text-sm font-medium text-red-600 hover:underline">Lihat Semua <i class="fa-solid fa-arrow-right ml-1"></i></a>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[650px]">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                    <th class="py-3 px-6">Waktu Kejadian</th>
-                                    <th class="py-3 px-6">Perangkat / Pelanggan</th>
-                                    <th class="py-3 px-6">Jenis Gangguan</th>
-                                    <th class="py-3 px-6">Status</th>
-                                    <th class="py-3 px-6">Aksi</th>
+                                <tr class="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">
+                                    <th class="py-3 px-4">Waktu Kejadian</th>
+                                    <th class="py-3 px-4">Perangkat / Pelanggan</th>
+                                    <th class="py-3 px-4">Jenis Gangguan</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 px-6 text-gray-500">2026-11-04 20:15</td>
-                                    <td class="py-3 px-6 font-medium">Budi Santoso (ONU-HSGQ-0142)</td>
-                                    <td class="py-3 px-6"><span class="text-red-600 font-semibold">LOS (Loss of Signal)</span></td>
-                                    <td class="py-3 px-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">Active</span></td>
-                                    <td class="py-3 px-6"><button class="text-blue-600 hover:underline text-xs font-medium">Detail</button></td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 px-6 text-gray-500">2026-11-04 19:40</td>
-                                    <td class="py-3 px-6 font-medium">PT Maju Jaya (ONU-CDATA-089)</td>
-                                    <td class="py-3 px-6"><span class="text-red-600 font-semibold">ONU Offline</span></td>
-                                    <td class="py-3 px-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">Acknowledged</span></td>
-                                    <td class="py-3 px-6"><button class="text-blue-600 hover:underline text-xs font-medium">Detail</button></td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 px-6 text-gray-500">2026-11-04 18:22</td>
-                                    <td class="py-3 px-6 font-medium">OLT-VSOL-01 (Port PON 1/2)</td>
-                                    <td class="py-3 px-6"><span class="text-amber-600 font-semibold">High RX Power Warning</span></td>
-                                    <td class="py-3 px-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">Resolved</span></td>
-                                    <td class="py-3 px-6"><button class="text-blue-600 hover:underline text-xs font-medium">Detail</button></td>
-                                </tr>
+                            <tbody id="alertsTableBody" class="divide-y divide-gray-200 dark:divide-gray-800 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-400">Memuat log gangguan dari server...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- LAST UPDATE TIMESTAMP -->
-                <div class="text-center text-xs text-gray-400 pb-4">
+                <!-- FOOTER TIMESTAMP -->
+                <div class="text-center text-xs text-gray-400 pb-2">
                     Pembaruan data terakhir: <span id="last-update-time">-</span> | MEGANET FTTH MONITORING (PROD)
                 </div>
 
@@ -279,108 +360,211 @@
         </div>
     </div>
 
-    <!-- Script JavaScript -->
+    <!-- Script JavaScript Real-Time Backend API -->
     <script>
-        // Fungsi Toggle Sidebar untuk HP
-        function toggleSidebar() {
-            const sidebar = document.getElementById('mobileSidebar');
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
             const overlay = document.getElementById('sidebarOverlay');
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
         }
 
-        let onuChartInstance = null;
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        async function fetchDashboardSummary() {
-            try {
-                const response = await fetch('/api/monitoring/summary');
-                const result = await response.json();
-                
-                if (result.success) {
-                    const d = result.data;
-                    document.getElementById('kpi-customers').innerText = d.total_customers;
-                    document.getElementById('kpi-online').innerText = d.onu_online;
-                    document.getElementById('kpi-offline').innerText = d.onu_offline;
-                    document.getElementById('kpi-olt').innerText = `${d.olts_online} / ${d.olts_total}`;
-                    document.getElementById('kpi-los').innerText = d.onu_los;
-                    document.getElementById('kpi-alerts').innerText = d.active_alerts;
-                    document.getElementById('last-update-time').innerText = new Date(d.last_update).toLocaleTimeString();
-
-                    updateOnuChart(d.onu_online, d.onu_offline, d.onu_los);
-                }
-            } catch (err) {
-                console.error('Gagal mengambil data summary:', err);
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meganet_theme', 'light');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meganet_theme', 'dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
             }
         }
 
-        function updateOnuChart(online, offline, los) {
-            const ctx = document.getElementById('onuChart').getContext('2d');
-            if (onuChartInstance) {
-                onuChartInstance.data.datasets[0].data = [online, offline, los];
-                onuChartInstance.update();
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('meganet_theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
             } else {
-                onuChartInstance = new Chart(ctx, {
-                    type: 'doughnut',
+                document.documentElement.classList.add('dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+        });
+
+        let trafficChartInstance = null;
+        const ctxTraffic = document.getElementById('trafficChart').getContext('2d');
+        
+        function initTrafficChart(labels, rxData, txData) {
+            if (trafficChartInstance) {
+                trafficChartInstance.data.labels = labels;
+                trafficChartInstance.data.datasets[0].data = rxData;
+                trafficChartInstance.data.datasets[1].data = txData;
+                trafficChartInstance.update();
+            } else {
+                trafficChartInstance = new Chart(ctxTraffic, {
+                    type: 'line',
                     data: {
-                        labels: ['Online', 'Offline', 'LOS'],
-                        datasets: [{
-                            data: [online, offline, los],
-                            backgroundColor: ['#16A34A', '#DC2626', '#F59E0B'],
-                            borderWidth: 0
-                        }]
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Download (RX)',
+                                data: rxData,
+                                borderColor: '#06B6D4',
+                                backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Upload (TX)',
+                                data: txData,
+                                borderColor: '#F59E0B',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 2
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } }
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, color: '#9CA3AF' } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(156, 163, 175, 0.1)' }, ticks: { font: { size: 10 }, color: '#9CA3AF' } },
+                            x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9CA3AF' } }
                         }
                     }
                 });
             }
         }
 
-        // Traffic Network Chart
-        const ctxTraffic = document.getElementById('trafficChart').getContext('2d');
-        new Chart(ctxTraffic, {
-            type: 'line',
-            data: {
-                labels: ['16:00', '17:00', '18:00', '19:00', '20:00', '21:00'],
-                datasets: [
-                    {
-                        label: 'Download (Mbps)',
-                        data: [420, 580, 850, 920, 780, 650],
-                        borderColor: '#DC2626',
-                        backgroundColor: 'rgba(220, 38, 38, 0.05)',
-                        fill: true,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Upload (Mbps)',
-                        data: [120, 180, 250, 310, 260, 210],
-                        borderColor: '#2563EB',
-                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
-                        fill: true,
-                        tension: 0.3
+        async function changeRouterTraffic(routerId) {
+            fetchDashboardData();
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const routerId = document.getElementById('routerSelect').value;
+                const response = await fetch(`/api/dashboard/realtime-data?router=${routerId}`);
+                
+                if (!response.ok) throw new Error("Gagal terhubung ke server backend");
+                
+                const result = await response.json();
+                if (result.success) {
+                    const d = result.data;
+
+                    document.getElementById('kpi-total').innerText = d.clients.total;
+                    document.getElementById('kpi-total-box').innerText = d.clients.total;
+                    document.getElementById('kpi-online').innerText = d.clients.online;
+                    document.getElementById('kpi-offline').innerText = d.clients.offline;
+                    document.getElementById('kpi-isolir').innerText = d.clients.isolir;
+                    
+                    document.getElementById('stat-mikrotik-count').innerText = `${d.infrastructure.mikrotik_count} Router`;
+                    document.getElementById('stat-olt-count').innerText = `${d.infrastructure.olt_count} OLT`;
+                    document.getElementById('stat-odp-count').innerText = `${d.infrastructure.odp_count} ODP (${d.infrastructure.cable_length})`;
+
+                    document.getElementById('financial-total').innerText = `Rp ${Number(d.financial.total_revenue).toLocaleString('id-ID')}`;
+                    document.getElementById('financial-ratio').innerText = `Profit Rasio ${d.financial.profit_ratio}% (${d.financial.status})`;
+
+                    document.getElementById('mk-identity').innerText = d.mikrotik.identity;
+                    document.getElementById('mk-ip').innerText = d.mikrotik.ip;
+                    document.getElementById('mk-uptime').innerText = d.mikrotik.uptime;
+                    document.getElementById('mk-cpu').innerText = `${d.mikrotik.cpu_load}%`;
+
+                    const portUsed = d.ports.used;
+                    const portTotal = d.ports.total;
+                    const portPct = Math.round((portUsed / portTotal) * 100) || 0;
+                    document.getElementById('port-ratio-text').innerText = `${portUsed} / ${portTotal} Terpakai`;
+                    document.getElementById('port-progress-bar').style.width = `${portPct}%`;
+                    document.getElementById('port-percentage').innerText = `${portPct}%`;
+                    document.getElementById('odp-critical').innerText = `${d.ports.odp_critical} ODP`;
+                    document.getElementById('odp-warning').innerText = `${d.ports.odp_warning} ODP`;
+
+                    document.getElementById('srv-cpu-bar').style.width = `${d.server.cpu_usage}%`;
+                    document.getElementById('srv-cpu-text').innerText = `${d.server.cpu_usage}%`;
+                    document.getElementById('srv-ram-bar').style.width = `${d.server.ram_usage}%`;
+                    document.getElementById('srv-ram-text').innerText = `${d.server.ram_usage}%`;
+                    document.getElementById('srv-temp').innerText = `${d.server.temperature}°C`;
+                    document.getElementById('srv-uptime').innerText = d.server.uptime;
+
+                    initTrafficChart(d.traffic.labels, d.traffic.rx, d.traffic.tx);
+                    document.getElementById('traffic-today').innerText = d.traffic.summary.today;
+                    document.getElementById('traffic-week').innerText = d.traffic.summary.week;
+                    document.getElementById('traffic-month').innerText = d.traffic.summary.month;
+
+                    const pkgContainer = document.getElementById('topPackagesContainer');
+                    pkgContainer.innerHTML = '';
+                    d.top_packages.forEach(pkg => {
+                        pkgContainer.innerHTML += `
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-300 font-medium">${pkg.name}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-400 text-xs">${pkg.subscribers} Pelanggan</span>
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400 rounded font-bold text-xs">${pkg.percentage}%</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    const techContainer = document.getElementById('technicianTicketsContainer');
+                    techContainer.innerHTML = '';
+                    d.technician_tickets.forEach(tc => {
+                        techContainer.innerHTML += `
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-800/60 last:border-0">
+                                <div>
+                                    <p class="font-semibold text-gray-800 dark:text-white">${tc.title}</p>
+                                    <p class="text-xs text-gray-400">Teknisi: ${tc.technician}</p>
+                                </div>
+                                <span class="px-2.5 py-1 ${tc.status_class} rounded font-semibold text-xs">${tc.status}</span>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('alert-count-badge').innerText = `${d.alerts.length} Active Alert`;
+                    const alertTable = document.getElementById('alertsTableBody');
+                    alertTable.innerHTML = '';
+                    if (d.alerts.length === 0) {
+                        alertTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Tidak ada gangguan aktif saat ini.</td></tr>`;
+                    } else {
+                        d.alerts.forEach(al => {
+                            alertTable.innerHTML += `
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                                    <td class="py-3 px-4 text-gray-400">${al.time}</td>
+                                    <td class="py-3 px-4 font-medium text-gray-900 dark:text-white">${al.device}</td>
+                                    <td class="py-3 px-4"><span class="text-red-600 font-semibold">${al.type}</span></td>
+                                    <td class="py-3 px-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400">${al.status}</span></td>
+                                    <td class="py-3 px-4 text-center"><button onclick="location.href='alerts.html'" class="text-blue-600 hover:underline font-medium">Detail</button></td>
+                                </tr>
+                            `;
+                        });
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#F3F4F6' } },
-                    x: { grid: { display: false } }
+
+                    document.getElementById('last-update-time').innerText = new Date().toLocaleTimeString();
+                    document.getElementById('systemStatusText').innerText = "DB & Mikrotik Connected (Live)";
                 }
+            } catch (err) {
+                console.warn("Mode koneksi backend offline / simulasi aktif:", err);
+                document.getElementById('systemStatusText').innerText = "Server API Offline (Mode Simulasi)";
             }
-        });
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchDashboardSummary();
-            setInterval(fetchDashboardSummary, 10000);
+            fetchDashboardData();
+            setInterval(fetchDashboardData, 10000);
         });
     </script>
 </body>
