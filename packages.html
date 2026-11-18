@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Paket Internet - MEGANET FTTH MONITORING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -23,167 +24,414 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
+    <style>
+        @media screen and (max-width: 768px) {
+            input[type="text"], input[type="search"], select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    <div class="flex h-screen overflow-hidden">
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('meganet_theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-[#0f172a] font-sans antialiased text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-200">
+
+    <div class="flex h-screen w-screen overflow-hidden relative">
 
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
-            <!-- Logo Brand -->
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <aside id="appSidebar" class="w-64 bg-white dark:bg-[#1e293b] border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="h-14 sm:h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-xl sm:text-2xl mr-2.5 shrink-0"></i>
+                    <span class="text-base sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-2 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard
+            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto text-xs sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Dashboard</span>
                 </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring OLT</span>
                 </a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring ONU</span>
                 </a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Traffic Network</span>
                 </a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan
-                </a>
-
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS
-                </a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan
-                </a>
-                <!-- MENU PAKET INTERNET AKTIF DI HALAMAN INI -->
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red">
-                    <i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet
-                </a>
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway
-                </a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Peta Jaringan</span>
                 </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-sm shrink-0"></i> <span class="ml-2.5">GenieACS</span>
                 </a>
-                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-sm shrink-0"></i> <span class="ml-2.5">Data Pelanggan</span>
                 </a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-3 py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red dark:bg-meganet-red/20 dark:text-red-400 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-sm shrink-0"></i> <span class="ml-2.5">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-sm shrink-0"></i> <span class="ml-2.5">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-sm shrink-0"></i> <span class="ml-2.5">Manajemen Teknisi</span>
+                </a>
+
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Pengaturan</span>
                 </a>
             </nav>
 
-            <!-- Sidebar Footer -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+            <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50 dark:bg-[#0f172a]">
             <!-- TOPBAR -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-                <div class="flex items-center">
-                    <h1 class="text-lg font-semibold text-gray-800">Manajemen Paket Internet</h1>
+            <header class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-30 shadow-xs shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="text-gray-700 dark:text-gray-200 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white uppercase tracking-wide">Manajemen Paket Internet</h1>
                 </div>
 
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-3 border-l pl-4 border-gray-200">
-                        <div class="w-9 h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold">AD</div>
-                        <div class="hidden sm:block text-left">
-                            <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
-                            <p class="text-xs text-gray-500 mt-1">Administrator</p>
-                        </div>
+                <div class="flex items-center space-x-2 md:space-x-3 text-xs sm:text-sm">
+                    <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2.5 rounded-lg transition" title="Ganti Tema">
+                        <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+                    <div class="flex items-center space-x-2 border-l pl-3 border-gray-200 dark:border-gray-700">
+                        <div class="w-8 h-8 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs">AD</div>
+                        <span class="hidden sm:inline font-semibold text-gray-700 dark:text-gray-200">Admin</span>
                     </div>
                 </div>
             </header>
 
             <!-- CONTENT -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
-                <div class="flex justify-between items-center mb-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 space-y-6">
+                <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Daftar Pilihan Paket Bandwidth</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Kelola kecepatan dan harga paket internet untuk pelanggan.</p>
+                        <h2 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white">Daftar Pilihan Paket Bandwidth (Fast Home)</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Kelola kecepatan dan harga paket internet untuk pelanggan.</p>
                     </div>
-                    <button onclick="alert('Form Tambah Paket')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                        <i class="fa-solid fa-plus mr-1"></i> Tambah Paket
+                    <button onclick="openAddPackageModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm flex items-center shrink-0">
+                        <i class="fa-solid fa-plus mr-1.5"></i> Tambah Paket
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <!-- Card Paket 1 -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
-                        <div>
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">Paket Home</span>
-                            <h3 class="text-xl font-bold text-gray-900 mt-3">Paket 10 Mbps</h3>
-                            <p class="text-2xl font-extrabold text-meganet-red mt-2">Rp 150.000 <span class="text-xs font-normal text-gray-500">/ bulan</span></p>
-                            <ul class="text-xs text-gray-600 space-y-2 mt-4 border-t pt-4">
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Kecepatan Up to 10 Mbps</li>
-                                <li class="text-gray-400"><i class="fa-solid fa-xmark text-red-500 mr-2"></i> Tanpa Batas Kuota (FUP)</li>
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Cocok untuk Browsing & Sosmed</li>
-                            </ul>
-                        </div>
-                        <div class="mt-6 flex space-x-2">
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition">Edit</button>
-                            <button class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-xs font-medium transition">Hapus</button>
-                        </div>
-                    </div>
-
-                    <!-- Card Paket 2 -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border-2 border-red-500 flex flex-col justify-between relative">
-                        <span class="absolute top-4 right-4 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Popular</span>
-                        <div>
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-full">Paket Family</span>
-                            <h3 class="text-xl font-bold text-gray-900 mt-3">Paket 20 Mbps</h3>
-                            <p class="text-2xl font-extrabold text-meganet-red mt-2">Rp 250.000 <span class="text-xs font-normal text-gray-500">/ bulan</span></p>
-                            <ul class="text-xs text-gray-600 space-y-2 mt-4 border-t pt-4">
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Kecepatan Up to 20 Mbps</li>
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Unlimited tanpa FUP</li>
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Cocok untuk Streaming HD & Gaming</li>
-                            </ul>
-                        </div>
-                        <div class="mt-6 flex space-x-2">
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition">Edit</button>
-                            <button class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-xs font-medium transition">Hapus</button>
-                        </div>
-                    </div>
-
-                    <!-- Card Paket 3 -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
-                        <div>
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">Paket Business</span>
-                            <h3 class="text-xl font-bold text-gray-900 mt-3">Paket 50 Mbps</h3>
-                            <p class="text-2xl font-extrabold text-meganet-red mt-2">Rp 450.000 <span class="text-xs font-normal text-gray-500">/ bulan</span></p>
-                            <ul class="text-xs text-gray-600 space-y-2 mt-4 border-t pt-4">
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Kecepatan Up to 50 Mbps</li>
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Prioritas Bandwidth (Dedicated)</li>
-                                <li><i class="fa-solid fa-check text-green-600 mr-2"></i> Cocok untuk Kantor & Cafe</li>
-                            </ul>
-                        </div>
-                        <div class="mt-6 flex space-x-2">
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition">Edit</button>
-                            <button class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-xs font-medium transition">Hapus</button>
-                        </div>
-                    </div>
+                <!-- GRID KARTU PAKET -->
+                <div id="packageGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Kartu paket akan dirender secara dinamis via JavaScript -->
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- MODAL TAMBAH / EDIT PAKET -->
+    <div id="packageModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 id="modalTitle" class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-tags mr-2 text-red-600"></i> Tambah Paket Internet</h3>
+                <button onclick="closePackageModal()" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="packageForm" onsubmit="savePackage(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Nama Paket</label>
+                    <input type="text" id="pkgName" required placeholder="e.g. Fast Home 1" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Kecepatan</label>
+                        <input type="text" id="pkgSpeed" required placeholder="e.g. 20 Mbps" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Harga Bulanan</label>
+                        <input type="text" id="pkgPrice" required placeholder="e.g. Rp. 130.000" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Kategori / Badge</label>
+                    <select id="pkgCategory" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
+                        <option value="Fast Home">Fast Home</option>
+                        <option value="Paket Family">Paket Family</option>
+                        <option value="Paket Business">Paket Business</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Fitur / Keunggulan (pisahkan dengan koma)</label>
+                    <textarea id="pkgFeatures" rows="3" placeholder="Upto 20 Mbps, Unlimited Quota, Sudah Termasuk PPN" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none resize-vertical"></textarea>
+                </div>
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="pkgPopular" class="rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-red-600">
+                    <label for="pkgPopular" class="text-xs text-gray-700 dark:text-gray-300 font-medium">Tandai sebagai Paket Populer (Popular)</label>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closePackageModal()" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition flex items-center shadow-sm"><i class="fa-solid fa-check mr-1.5"></i> Simpan Paket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI HAPUS CUSTOM -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[9998] p-4">
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-200 dark:border-gray-800 text-center text-xs sm:text-sm">
+            <div class="w-12 h-12 bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="font-bold text-base mb-1">Konfirmasi Hapus</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-xs mb-5">Yakin ingin menghapus paket internet ini dari sistem?</p>
+            <div class="flex space-x-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition">Batal</button>
+                <button id="confirmDeleteBtn" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold shadow transition">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = type === 'success' 
+                ? 'bg-emerald-900/95 border-emerald-700 text-emerald-100' 
+                : 'bg-red-900/95 border-red-700 text-red-100';
+            
+            let iconClass = type === 'success' 
+                ? 'fa-circle-check text-emerald-400' 
+                : 'fa-triangle-exclamation text-red-400';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md text-xs w-80 toast-enter ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base mt-0.5 shrink-0"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-sm mb-0.5">${title}</div>
+                    <div class="text-[11px] opacity-90 leading-relaxed">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meganet_theme', 'light');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meganet_theme', 'dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+        }
+
+        const brochurePackages = [
+            { id: 1, name: 'Fast Home 1', speed: '20 Mbps', price: 'Rp. 130.000', category: 'Fast Home', features: ['Upto 20 Mbps', 'Unlimited Quota', 'Sudah Termasuk PPN', 'Perangkat Dipinjamkan'], popular: false },
+            { id: 2, name: 'Fast Home 2', speed: '30 Mbps', price: 'Rp. 150.000', category: 'Fast Home', features: ['Upto 30 Mbps', 'Unlimited Quota', 'Sudah Termasuk PPN', 'Perangkat Dipinjamkan'], popular: false },
+            { id: 3, name: 'Fast Home 3', speed: '50 Mbps', price: 'Rp. 170.000', category: 'Fast Home', features: ['Upto 50 Mbps', 'Unlimited Quota', 'Sudah Termasuk PPN', 'Tagihan Flat'], popular: true },
+            { id: 4, name: 'Fast Home 4', speed: '70 Mbps', price: 'Rp. 200.000', category: 'Fast Home', features: ['Upto 70 Mbps', 'Unlimited Quota', 'Sudah Termasuk PPN', 'Tagihan Flat'], popular: false },
+            { id: 5, name: 'Fast Home 5', speed: '100 Mbps', price: 'Rp. 250.000', category: 'Fast Home', features: ['Upto 100 Mbps', 'Unlimited Quota', 'Sudah Termasuk PPN', 'Customer Service 24/7'], popular: false }
+        ];
+
+        let packagesList = JSON.parse(localStorage.getItem('meganet_packages_data')) || brochurePackages;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('meganet_theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+            renderPackages();
+        });
+
+        function renderPackages() {
+            const grid = document.getElementById('packageGrid');
+            grid.innerHTML = '';
+
+            if (packagesList.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 p-8 text-center text-gray-400">Belum ada data paket internet. Silakan tambah paket baru.</div>`;
+                return;
+            }
+
+            packagesList.forEach((pkg) => {
+                let badgeColor = 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400';
+                if(pkg.category === 'Paket Family') badgeColor = 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400';
+                if(pkg.category === 'Paket Business') badgeColor = 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400';
+
+                let borderClass = pkg.popular ? 'border-2 border-red-500 relative' : 'border border-gray-200 dark:border-gray-800';
+                let popularBadge = pkg.popular ? `<span class="absolute top-4 right-4 bg-red-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Popular</span>` : '';
+
+                let featuresHtml = pkg.features.map(f => `<li><i class="fa-solid fa-check text-green-600 mr-2"></i> ${f}</li>`).join('');
+
+                grid.innerHTML += `
+                    <div class="bg-white dark:bg-[#1e293b] p-6 rounded-2xl shadow-xs flex flex-col justify-between ${borderClass} transition">
+                        ${popularBadge}
+                        <div>
+                            <span class="px-2.5 py-1 text-[10px] font-semibold ${badgeColor} rounded-full">${pkg.category}</span>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-3">${pkg.name} (${pkg.speed})</h3>
+                            <p class="text-2xl font-extrabold text-meganet-red mt-2">${pkg.price} <span class="text-xs font-normal text-gray-500">/bulan</span></p>
+                            <ul class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mt-4 border-t border-gray-100 dark:border-gray-800 pt-4">
+                                ${featuresHtml}
+                            </ul>
+                        </div>
+                        <div class="mt-6 flex space-x-2">
+                            <button onclick="editPackage(${pkg.id})" class="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-xl text-xs font-medium transition">Edit</button>
+                            <button onclick="confirmDeletePackage(${pkg.id})" class="flex-1 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 text-red-600 dark:text-red-400 py-2 rounded-xl text-xs font-medium transition">Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        let editingPackageId = null;
+        let deleteTargetId = null;
+
+        function openAddPackageModal() {
+            editingPackageId = null;
+            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-tags mr-2 text-red-600"></i> Tambah Paket Internet`;
+            document.getElementById('packageForm').reset();
+            document.getElementById('packageModal').classList.remove('hidden');
+        }
+
+        function editPackage(id) {
+            editingPackageId = id;
+            const pkg = packagesList.find(p => p.id === id);
+            if(pkg) {
+                document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square mr-2 text-blue-600"></i> Edit Paket Internet`;
+                document.getElementById('pkgName').value = pkg.name;
+                document.getElementById('pkgSpeed').value = pkg.speed;
+                document.getElementById('pkgPrice').value = pkg.price;
+                document.getElementById('pkgCategory').value = pkg.category;
+                document.getElementById('pkgFeatures').value = pkg.features.join(', ');
+                document.getElementById('pkgPopular').checked = pkg.popular || false;
+                document.getElementById('packageModal').classList.remove('hidden');
+            }
+        }
+
+        function closePackageModal() {
+            document.getElementById('packageModal').classList.add('hidden');
+        }
+
+        function savePackage(e) {
+            e.preventDefault();
+            const name = document.getElementById('pkgName').value.trim();
+            const speed = document.getElementById('pkgSpeed').value.trim();
+            const price = document.getElementById('pkgPrice').value.trim();
+            const category = document.getElementById('pkgCategory').value;
+            const rawFeatures = document.getElementById('pkgFeatures').value.trim();
+            const popular = document.getElementById('pkgPopular').checked;
+
+            const features = rawFeatures ? rawFeatures.split(',').map(f => f.trim()) : [`Upto ${speed}`, 'Unlimited Quota', 'Sudah Termasuk PPN'];
+
+            if(editingPackageId !== null) {
+                let index = packagesList.findIndex(p => p.id === editingPackageId);
+                if(index !== -1) {
+                    packagesList[index] = { id: editingPackageId, name, speed, price, category, features, popular };
+                }
+            } else {
+                packagesList.push({
+                    id: Date.now(),
+                    name,
+                    speed,
+                    price,
+                    category,
+                    features,
+                    popular
+                });
+            }
+
+            localStorage.setItem('meganet_packages_data', JSON.stringify(packagesList));
+            renderPackages();
+            closePackageModal();
+            showToast('Berhasil', 'Paket internet berhasil disimpan permanen!');
+        }
+
+        function confirmDeletePackage(id) {
+            deleteTargetId = id;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            deleteTargetId = null;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (deleteTargetId !== null) {
+                packagesList = packagesList.filter(p => p.id !== deleteTargetId);
+                localStorage.setItem('meganet_packages_data', JSON.stringify(packagesList));
+                renderPackages();
+                closeConfirmModal();
+                showToast('Dihapus', 'Paket internet berhasil dihapus.', 'error');
+            }
+        });
+    </script>
 </body>
 </html>
