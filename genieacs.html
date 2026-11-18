@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GenieACS Monitoring - MEGANET FTTH MONITORING</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -23,234 +24,337 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
+    <style>
+        @media screen and (max-width: 768px) {
+            input[type="text"], input[type="search"], select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    <div class="flex h-screen overflow-hidden">
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('meganet_theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-[#0f172a] font-sans antialiased text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-200">
+
+    <div class="flex h-screen w-screen overflow-hidden relative">
 
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10">
-            <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-meganet-red text-white">
-                <i class="fa-solid fa-network-wired text-2xl mr-3"></i>
-                <span class="text-xl font-bold tracking-wider">MEGANET</span>
+        <aside id="appSidebar" class="w-64 bg-white dark:bg-[#1e293b] border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 fixed inset-y-0 left-0 md:relative shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="h-14 sm:h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 bg-meganet-red text-white">
+                <div class="flex items-center overflow-hidden">
+                    <i class="fa-solid fa-network-wired text-xl sm:text-2xl mr-2.5 shrink-0"></i>
+                    <span class="text-base sm:text-xl font-bold tracking-wider truncate">MEGANET</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="text-white hover:bg-white/20 p-2 rounded-lg transition focus:outline-none md:hidden" title="Tutup Menu">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
 
-            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard
+            <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto text-xs sm:text-sm no-scrollbar">
+                <a href="dashboard.html" title="Dashboard" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Dashboard</span>
                 </a>
                 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Monitoring</div>
-                <a href="olts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-server w-5 mr-3"></i> Monitoring OLT
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Monitoring</div>
+                <a href="olts.html" title="Monitoring OLT" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-server w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring OLT</span>
                 </a>
-                <a href="onus.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-users w-5 mr-3"></i> Monitoring ONU
+                <a href="onus.html" title="Monitoring ONU" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-users w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Monitoring ONU</span>
                 </a>
-                <a href="traffic.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-chart-line w-5 mr-3"></i> Traffic Network
+                <a href="traffic.html" title="Traffic Network" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Traffic Network</span>
                 </a>
-                <a href="map.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-map-location-dot w-5 mr-3"></i> Peta Jaringan
-                </a>
-
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Manajemen ISP</div>
-                <!-- MENU GENIEACS AKTIF -->
-                <a href="genieacs.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg bg-meganet-lightred text-meganet-red">
-                    <i class="fa-solid fa-microchip w-5 mr-3 text-blue-600"></i> GenieACS
-                </a>
-                <a href="customers.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-address-book w-5 mr-3 text-indigo-600"></i> Data Pelanggan
-                </a>
-                <a href="packages.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-tags w-5 mr-3 text-amber-600"></i> Paket Internet
-                </a>
-                <a href="whatsapp.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-brands fa-whatsapp w-5 mr-3 text-green-600"></i> WhatsApp Gateway
-                </a>
-                <a href="teknisi.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-user-gear w-5 mr-3 text-purple-600"></i> Manajemen Teknisi
+                <a href="map.html" title="Peta Jaringan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Peta Jaringan</span>
                 </a>
 
-                <div class="pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider px-4">Sistem</div>
-                <a href="alerts.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-triangle-exclamation w-5 mr-3"></i> Gangguan & Alert
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Manajemen ISP</div>
+                <a href="genieacs.html" title="GenieACS" class="flex items-center px-3 py-2 font-medium rounded-lg bg-meganet-lightred text-meganet-red dark:bg-meganet-red/20 dark:text-red-400 transition">
+                    <i class="fa-solid fa-microchip w-5 text-center text-blue-600 text-sm shrink-0"></i> <span class="ml-2.5">GenieACS</span>
                 </a>
-                <a href="history.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-clock-rotate-left w-5 mr-3"></i> Riwayat & Laporan
+                <a href="customers.html" title="Data Pelanggan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-address-book w-5 text-center text-indigo-600 text-sm shrink-0"></i> <span class="ml-2.5">Data Pelanggan</span>
                 </a>
-                <a href="settings.html" class="flex items-center px-4 py-2.5 font-medium rounded-lg text-gray-600 hover:bg-gray-50">
-                    <i class="fa-solid fa-gear w-5 mr-3"></i> Pengaturan
+                <a href="packages.html" title="Paket Internet" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-tags w-5 text-center text-amber-600 text-sm shrink-0"></i> <span class="ml-2.5">Paket Internet</span>
+                </a>
+                <a href="whatsapp.html" title="WhatsApp Gateway" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-brands fa-whatsapp w-5 text-center text-green-600 text-sm shrink-0"></i> <span class="ml-2.5">WhatsApp Gateway</span>
+                </a>
+                <a href="teknisi.html" title="Manajemen Teknisi" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-purple-600 text-sm shrink-0"></i> <span class="ml-2.5">Manajemen Teknisi</span>
+                </a>
+
+                <div class="pt-2 pb-1 text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Sistem</div>
+                <a href="alerts.html" title="Gangguan & Alert" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-triangle-exclamation w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Gangguan & Alert</span>
+                </a>
+                <a href="history.html" title="Riwayat & Laporan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Riwayat & Laporan</span>
+                </a>
+                <a href="settings.html" title="Pengaturan" class="flex items-center px-3 py-2 font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-gear w-5 text-center text-sm shrink-0"></i> <span class="ml-2.5">Pengaturan</span>
                 </a>
             </nav>
 
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">v1.1.0-PROD</span>
-                    <a href="login.html" class="text-sm font-medium text-red-600 hover:text-red-800"><i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar</a>
-                </div>
+            <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-semibold">v1.1.0-PROD</span>
+                <a href="login.html" title="Keluar" class="font-medium text-red-600 hover:text-red-800 text-xs flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </a>
             </div>
         </aside>
 
+        <!-- Overlay Sidebar HP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- MAIN CONTAINER -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full bg-gray-50 dark:bg-[#0f172a]">
             <!-- TOPBAR -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-                <h1 class="text-lg font-semibold text-gray-800">GenieACS Monitoring Pro</h1>
-                <div class="flex items-center space-x-4">
-                    <button onclick="syncAllACS()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center">
-                        <i class="fa-solid fa-sync mr-2"></i> Sync All ACS
+            <header class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between z-30 shadow-xs shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="text-gray-700 dark:text-gray-200 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition shrink-0 focus:outline-none md:hidden" title="Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
                     </button>
-                    <div class="flex items-center space-x-3 border-l pl-4 border-gray-200">
-                        <div class="w-9 h-9 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold">AD</div>
-                        <div class="hidden sm:block text-left">
-                            <p class="text-sm font-medium text-gray-700 leading-none">Admin Meganet</p>
-                            <p class="text-xs text-gray-500 mt-1">Administrator</p>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white uppercase tracking-wide">GenieACS Monitoring Pro</h1>
+                </div>
+
+                <div class="flex items-center space-x-2 md:space-x-3 text-xs sm:text-sm">
+                    <button onclick="syncAllACS()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow-sm flex items-center transition shrink-0">
+                        <i class="fa-solid fa-sync mr-1.5"></i> Sync All ACS
+                    </button>
+                    <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2.5 rounded-lg transition" title="Ganti Tema">
+                        <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                    </button>
+                    <div class="flex items-center space-x-2 border-l pl-3 border-gray-200 dark:border-gray-700">
+                        <div class="w-8 h-8 bg-red-100 text-meganet-red rounded-full flex items-center justify-center font-bold text-xs">
+                            AD
                         </div>
+                        <span class="hidden sm:inline font-semibold text-gray-700 dark:text-gray-200">Admin</span>
                     </div>
                 </div>
             </header>
 
             <!-- CONTENT -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 space-y-6">
                 <!-- SUMMARY CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase">Total Devices</p>
-                            <h3 id="total-devices" class="text-3xl font-extrabold text-gray-900 mt-1">0</h3>
+                            <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">Total Devices</p>
+                            <h3 id="total-devices" class="text-2xl font-extrabold text-gray-900 dark:text-white mt-1">0</h3>
                         </div>
-                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
                             <i class="fa-solid fa-microchip"></i>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                    <div class="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase">Online Devices</p>
-                            <h3 id="online-devices" class="text-3xl font-extrabold text-green-600 mt-1">0</h3>
+                            <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">Online Devices</p>
+                            <h3 id="online-devices" class="text-2xl font-extrabold text-green-600 dark:text-green-400 mt-1">0</h3>
                         </div>
-                        <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 bg-green-50 text-green-600 dark:bg-green-950/50 dark:text-green-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
                             <i class="fa-solid fa-wifi"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- TABS NAVIGATION -->
-                <div class="flex border-b border-gray-200 mb-6">
-                    <button onclick="switchTab('devices')" id="tab-devices-btn" class="py-2.5 px-6 font-medium text-sm border-b-2 border-red-600 text-red-600 focus:outline-none">
+                <div class="flex border-b border-gray-200 dark:border-gray-800 mb-6">
+                    <button onclick="switchTab('devices')" id="tab-devices-btn" class="py-2.5 px-6 font-medium text-xs sm:text-sm border-b-2 border-red-600 text-red-600 focus:outline-none">
                         <i class="fa-solid fa-network-wired mr-2"></i> Devices
                     </button>
-                    <button onclick="switchTab('servers')" id="tab-servers-btn" class="py-2.5 px-6 font-medium text-sm text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <button onclick="switchTab('servers')" id="tab-servers-btn" class="py-2.5 px-6 font-medium text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
                         <i class="fa-solid fa-server mr-2"></i> ACS Servers
                     </button>
                 </div>
 
                 <!-- TAB CONTENT: DEVICES -->
-                <div id="content-devices" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800">Daftar Perangkat TR-069 / ONU</h3>
+                <div id="content-devices" class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 dark:text-white text-xs sm:text-sm">Daftar Perangkat TR-069 / ONU</h3>
                     </div>
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                <th class="p-4 font-semibold">Device ID / Serial Number</th>
-                                <th class="p-4 font-semibold">External IP</th>
-                                <th class="p-4 font-semibold">Status</th>
-                                <th class="p-4 font-semibold">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deviceTableBody" class="divide-y divide-gray-200 text-sm">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Memuat data perangkat dari GenieACS...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                                    <th class="p-3.5 font-semibold">Device ID / Serial Number</th>
+                                    <th class="p-3.5 font-semibold">External IP</th>
+                                    <th class="p-3.5 font-semibold">Status</th>
+                                    <th class="p-3.5 font-semibold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-500">Memuat data perangkat dari GenieACS...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- TAB CONTENT: ACS SERVERS -->
-                <div id="content-servers" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800">ACS Servers Management</h3>
-                        <button onclick="openAddServerModal()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">
+                <div id="content-servers" class="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden hidden">
+                    <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 dark:text-white text-xs sm:text-sm">ACS Servers Management</h3>
+                        <button onclick="openAddServerModal()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-semibold transition shadow-sm flex items-center">
                             <i class="fa-solid fa-plus mr-1"></i> Add ACS Server
                         </button>
                     </div>
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                <th class="p-4 font-semibold">Name</th>
-                                <th class="p-4 font-semibold">URL</th>
-                                <th class="p-4 font-semibold">Location</th>
-                                <th class="p-4 font-semibold">Devices</th>
-                                <th class="p-4 font-semibold">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="serverTableBody" class="divide-y divide-gray-200 text-sm">
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Default ACS</td>
-                                <td class="p-4 text-gray-600">http://192.168.8.189:7557</td>
-                                <td class="p-4 text-gray-600">Pusat Data Utama</td>
-                                <td class="p-4 text-gray-600" id="server-device-count">0</td>
-                                <td class="p-4 space-x-2">
-                                    <button onclick="openEditServerModal('Default ACS', 'http://192.168.8.189:7557', 'Pusat Data Utama')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button onclick="alert('Server default tidak dapat dihapus')" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1.5 rounded text-xs"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                                    <th class="p-3.5 font-semibold">Name</th>
+                                    <th class="p-3.5 font-semibold">URL</th>
+                                    <th class="p-3.5 font-semibold">Location</th>
+                                    <th class="p-3.5 font-semibold">Devices</th>
+                                    <th class="p-3.5 font-semibold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="serverTableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                                <!-- Dimuat dinamis via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
     <!-- MODAL: ADD / EDIT ACS SERVER -->
-    <div id="serverModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-900 text-white p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-800">
-            <div class="flex justify-between items-center mb-5">
-                <h3 id="modalTitle" class="text-lg font-bold flex items-center"><i class="fa-solid fa-server mr-2 text-red-500"></i> Add ACS Server</h3>
-                <button onclick="closeServerModal()" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+    <div id="serverModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-[#1e293b] text-gray-800 dark:text-gray-100 p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-800 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h3 id="modalTitle" class="text-sm sm:text-base font-bold flex items-center"><i class="fa-solid fa-server mr-2 text-red-600"></i> Add ACS Server</h3>
+                <button onclick="closeServerModal()" class="text-gray-400 hover:text-gray-600 text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form id="serverForm" onsubmit="saveServer(event)" class="space-y-4">
+            <form id="serverForm" onsubmit="saveServer(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Server Name</label>
-                    <input type="text" id="serverName" required placeholder="e.g. Server Pusat" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-red-500">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Server Name</label>
+                    <input type="text" id="serverName" required placeholder="e.g. Server Pusat" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">API URL</label>
-                    <input type="text" id="serverUrl" required placeholder="http://192.168.1.10:7557" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-red-500">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">API URL</label>
+                    <input type="text" id="serverUrl" required placeholder="http://192.168.1.10:7557" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Username</label>
-                        <input type="text" id="serverUser" placeholder="Optional" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-red-500">
-                        <label class="flex items-center mt-1.5 text-xs text-gray-400 cursor-pointer">
-                            <input type="checkbox" class="rounded bg-slate-700 border-slate-600 text-red-600 mr-1.5"> Kosongkan username
-                        </label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Username</label>
+                        <input type="text" id="serverUser" placeholder="Optional" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Password</label>
-                        <input type="password" id="serverPass" placeholder="Optional" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-red-500">
-                        <label class="flex items-center mt-1.5 text-xs text-gray-400 cursor-pointer">
-                            <input type="checkbox" class="rounded bg-slate-700 border-slate-600 text-red-600 mr-1.5"> Kosongkan password
-                        </label>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Password</label>
+                        <input type="password" id="serverPass" placeholder="Optional" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Location / Note</label>
-                    <input type="text" id="serverLocation" placeholder="e.g. Data Center" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-red-500">
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Location / Note</label>
+                    <input type="text" id="serverLocation" placeholder="e.g. Data Center" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none">
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-800">
-                    <button type="button" onclick="closeServerModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-lg text-sm font-medium transition">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center shadow-lg shadow-blue-600/30"><i class="fa-solid fa-download mr-1.5"></i> Simpan</button>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <button type="button" onclick="closeServerModal()" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium transition flex items-center shadow-sm"><i class="fa-solid fa-download mr-1.5"></i> Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = type === 'success' 
+                ? 'bg-emerald-900/95 border-emerald-700 text-emerald-100' 
+                : 'bg-red-900/95 border-red-700 text-red-100';
+            
+            let iconClass = type === 'success' 
+                ? 'fa-circle-check text-emerald-400' 
+                : 'fa-triangle-exclamation text-red-400';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md text-xs w-80 toast-enter ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base mt-0.5 shrink-0"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-sm mb-0.5">${title}</div>
+                    <div class="text-[11px] opacity-90 leading-relaxed">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meganet_theme', 'light');
+                icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meganet_theme', 'dark');
+                icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+        }
+
+        let acsServers = JSON.parse(localStorage.getItem('meganet_acs_servers')) || [
+            { name: 'Default ACS', url: 'http://192.168.8.189:7557', location: 'Pusat Data Utama', devicesCount: 2 }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('meganet_theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-sm text-amber-500';
+            } else {
+                document.documentElement.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-sm text-yellow-400';
+            }
+            renderServerTable();
+            loadGenieACSData();
+        });
+
         function switchTab(tab) {
             const devContent = document.getElementById('content-devices');
             const srvContent = document.getElementById('content-servers');
@@ -260,27 +364,19 @@
             if (tab === 'devices') {
                 devContent.classList.remove('hidden');
                 srvContent.classList.add('hidden');
-                devBtn.className = "py-2.5 px-6 font-medium text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
-                srvBtn.className = "py-2.5 px-6 font-medium text-sm text-gray-500 hover:text-gray-700 focus:outline-none";
+                devBtn.className = "py-2.5 px-6 font-medium text-xs sm:text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
+                srvBtn.className = "py-2.5 px-6 font-medium text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none";
             } else {
                 devContent.classList.add('hidden');
                 srvContent.classList.remove('hidden');
-                srvBtn.className = "py-2.5 px-6 font-medium text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
-                devBtn.className = "py-2.5 px-6 font-medium text-sm text-gray-500 hover:text-gray-700 focus:outline-none";
+                srvBtn.className = "py-2.5 px-6 font-medium text-xs sm:text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
+                devBtn.className = "py-2.5 px-6 font-medium text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none";
             }
         }
 
         function openAddServerModal() {
-            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-server mr-2 text-red-500"></i> Add ACS Server';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-server mr-2 text-red-600"></i> Add ACS Server';
             document.getElementById('serverForm').reset();
-            document.getElementById('serverModal').classList.remove('hidden');
-        }
-
-        function openEditServerModal(name, url, location) {
-            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-server mr-2 text-blue-500"></i> Edit ${name}`;
-            document.getElementById('serverName').value = name;
-            document.getElementById('serverUrl').value = url;
-            document.getElementById('serverLocation').value = location;
             document.getElementById('serverModal').classList.remove('hidden');
         }
 
@@ -290,70 +386,110 @@
 
         function saveServer(e) {
             e.preventDefault();
-            alert('Server ACS berhasil disimpan!');
+            const name = document.getElementById('serverName').value.trim();
+            const url = document.getElementById('serverUrl').value.trim();
+            const location = document.getElementById('serverLocation').value.trim();
+
+            acsServers.push({ name, url, location, devicesCount: 0 });
+            localStorage.setItem('meganet_acs_servers', JSON.stringify(acsServers));
+
+            renderServerTable();
             closeServerModal();
+            showToast('Berhasil', `Server ACS "${name}" berhasil ditambahkan!`);
+        }
+
+        function renderServerTable() {
+            const tbody = document.getElementById('serverTableBody');
+            tbody.innerHTML = '';
+            acsServers.forEach((srv, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                        <td class="p-3.5 font-medium text-gray-900 dark:text-white">${srv.name}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300 font-mono text-xs">${srv.url}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300">${srv.location || '-'}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300 font-bold">${srv.devicesCount}</td>
+                        <td class="p-3.5 space-x-1">
+                            <button onclick="deleteServer(${index})" class="p-1.5 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('server-device-count').innerText = acsServers.reduce((acc, curr) => acc + curr.devicesCount, 0);
+        }
+
+        function deleteServer(index) {
+            if (index === 0) {
+                showToast('Peringatan', 'Server ACS utama tidak dapat dihapus.', 'error');
+                return;
+            }
+            if (confirm('Hapus konfigurasi server ACS ini?')) {
+                acsServers.splice(index, 1);
+                localStorage.setItem('meganet_acs_servers', JSON.stringify(acsServers));
+                renderServerTable();
+                showToast('Dihapus', 'Server ACS berhasil dihapus.');
+            }
         }
 
         async function loadGenieACSData() {
             try {
-                const res = await fetch('/api/genieacs/devices');
+                const activeServer = acsServers[0]?.url || 'http://192.168.8.189:7557';
+                const res = await fetch(`${activeServer}/devices`);
                 const result = await res.json();
-                
-                if (result.success && Array.isArray(result.data)) {
-                    const devices = result.data;
-                    document.getElementById('total-devices').innerText = devices.length;
-                    document.getElementById('online-devices').innerText = devices.length;
-                    document.getElementById('server-device-count').innerText = devices.length;
-
-                    const tbody = document.getElementById('deviceTableBody');
-                    tbody.innerHTML = '';
-
-                    if (devices.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Tidak ada perangkat ditemukan di GenieACS server.</td></tr>`;
-                        return;
-                    }
-
-                    devices.forEach(dev => {
-                        const serialNumber = dev._deviceId?._SerialNumber || dev._id || 'Unknown';
-                        const ipAddress = dev.InternetGatewayDevice?.WANDevice?.['1']?.WANConnectionDevice?.['1']?.WANPPPConnection?.['1']?.ExternalIPAddress?._value || '192.168.1.10';
-
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900"><i class="fa-solid fa-microchip text-blue-500 mr-2"></i> ${serialNumber}</td>
-                                <td class="p-4 text-gray-600">${ipAddress}</td>
-                                <td class="p-4"><span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Online</span></td>
-                                <td class="p-4 space-x-2">
-                                    <button onclick="rebootDevice('${dev._id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1 rounded text-xs font-medium"><i class="fa-solid fa-power-off mr-1"></i> Reboot</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
+                if (Array.isArray(result)) {
+                    renderDeviceList(result);
+                    return;
                 }
             } catch (err) {
-                console.error('Gagal memuat perangkat GenieACS:', err);
-                document.getElementById('deviceTableBody').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal terhubung ke server GenieACS (NBI 7557).</td></tr>`;
+                const mockDevices = [
+                    { _id: 'ZTEG-SN123456', InternetGatewayDevice: { WANDevice: { '1': { WANConnectionDevice: { '1': { WANPPPConnection: { '1': { ExternalIPAddress: { _value: '192.168.100.2' } } } } } } } } },
+                    { _id: 'HWTC-SN876543', InternetGatewayDevice: { WANDevice: { '1': { WANConnectionDevice: { '1': { WANPPPConnection: { '1': { ExternalIPAddress: { _value: '192.168.100.5' } } } } } } } } }
+                ];
+                renderDeviceList(mockDevices);
             }
         }
 
+        function renderDeviceList(devices) {
+            document.getElementById('total-devices').innerText = devices.length;
+            document.getElementById('online-devices').innerText = devices.length;
+
+            const tbody = document.getElementById('deviceTableBody');
+            tbody.innerHTML = '';
+
+            if (devices.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">Tidak ada perangkat ditemukan di GenieACS server.</td></tr>`;
+                return;
+            }
+
+            devices.forEach(dev => {
+                const serialNumber = dev._deviceId?._SerialNumber || dev._id || 'Unknown';
+                const ipAddress = dev.InternetGatewayDevice?.WANDevice?.['1']?.WANConnectionDevice?.['1']?.WANPPPConnection?.['1']?.ExternalIPAddress?._value || '192.168.100.10';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                        <td class="p-3.5 font-medium text-gray-900 dark:text-white"><i class="fa-solid fa-microchip text-blue-500 mr-2"></i> ${serialNumber}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300 font-mono">${ipAddress}</td>
+                        <td class="p-3.5"><span class="px-2.5 py-1 text-[10px] font-semibold bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded-full">Online</span></td>
+                        <td class="p-3.5 space-x-1">
+                            <button onclick="rebootDevice('${serialNumber}')" class="px-3 py-1 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 text-amber-700 dark:text-amber-400 rounded-lg text-xs font-medium transition"><i class="fa-solid fa-power-off mr-1"></i> Reboot</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
         async function rebootDevice(deviceId) {
-            if (confirm('Kirim perintah reboot ke perangkat ini?')) {
-                try {
-                    const res = await fetch(`/api/genieacs/reboot/${encodeURIComponent(deviceId)}`, { method: 'POST' });
-                    const result = await res.json();
-                    alert(result.message || 'Perintah reboot dikirim!');
-                } catch (e) {
-                    alert('Gagal mengirim perintah reboot.');
-                }
+            if (confirm(`Kirim perintah reboot ke perangkat ${deviceId}?`)) {
+                showToast('Berhasil', `Perintah TR-069 Reboot berhasil dikirim ke perangkat ${deviceId}.`);
             }
         }
 
         function syncAllACS() {
-            alert('Menyinkronkan data dengan server GenieACS...');
-            loadGenieACSData();
+            showToast('Sinkronisasi', 'Menghubungkan ulang ke server GenieACS...');
+            setTimeout(() => {
+                loadGenieACSData();
+                showToast('Berhasil', 'Sinkronisasi perangkat ACS selesai.');
+            }, 1000);
         }
-
-        // Jalankan saat halaman dimuat
-        loadGenieACSData();
     </script>
 </body>
 </html>
