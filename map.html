@@ -99,7 +99,6 @@
         .toast-exit { animation: slideOut 0.3s ease-in forwards; }
     </style>
     <script>
-        // Menerapkan tema tersimpan dari localStorage sebelum halaman dirender
         const savedTheme = localStorage.getItem('meganet_theme');
         if (savedTheme === 'light') {
             document.documentElement.classList.remove('dark');
@@ -211,7 +210,6 @@
                     </div>
 
                     <div class="flex items-center space-x-2 shrink-0">
-                        <!-- Tombol Toggle Dark/Light Mode -->
                         <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-yellow-400 p-2 rounded-lg transition" title="Ganti Tema">
                             <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
                         </button>
@@ -388,7 +386,7 @@
                         <tr class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 text-xs">
                             <th class="p-2">Pelanggan</th>
                             <th class="p-2">PPPoE</th>
-                            <th class="p-2">IP Address</th>
+                            <th class="p-2">Redaman</th>
                             <th class="p-2">ODP</th>
                             <th class="p-2">Status</th>
                             <th class="p-2 text-center">Peta</th>
@@ -441,7 +439,6 @@
             overlay.classList.toggle('hidden');
         }
 
-        // Fungsi Tombol Toggle Tema Terhubung Antar Halaman
         function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -496,6 +493,11 @@
             return L.layerGroup().addTo(map);
         }
 
+        function isInfrastructureNode(name) {
+            const upper = (name || '').toUpperCase();
+            return upper.includes('ODP') || upper.includes('HTB') || upper.includes('SERVER CORE');
+        }
+
         let allMarkers = []; 
         let layerGroupJalur = L.layerGroup().addTo(map);    
 
@@ -526,311 +528,99 @@
             showToast('Refresh Peta', 'Memuat ulang data jaringan terbaru.');
         }
 
-        // ==================== FUNGSI-FUNGSI MENU ====================
+       // ==================== FUNGSI KML (PERSISTENT MYSQL) ====================
 
-        async function syncMikrotikLive() {
-            const btn = document.getElementById('btnSyncMikrotik');
-            const oriText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Menyinkronkan...';
+        function geoJsonToDbFeatures(geojsonData) {
+            const features = [];
+            if (!geojsonData || !Array.isArray(geojsonData.features)) return features;
 
-            try {
-                const response = await fetch('/api/mikrotik/sync', { method: 'POST' });
-                if (response.ok) {
-                    const data = await response.json();
-                    showToast('Sync Mikrotik Berhasil', data.message || 'Status router & PPPoE pelanggan berhasil diperbarui.');
-                } else {
-                    showToast('Gagal Sync', 'Router tidak merespons permintaan API.', 'error');
+            for (const f of geojsonData.features) {
+                const geom = f && f.geometry;
+                if (!geom) continue;
+
+                const name = (f.properties && f.properties.name) ? String(f.properties.name) : '';
+                const desc = (f.properties && (f.properties.customDesc || f.properties.description))
+                    ? String(f.properties.customDesc || f.properties.description)
+                    : 'Tidak ada keterangan';
+
+                if (geom.type === 'Point' && Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) {
+                    const lng = Number(geom.coordinates[0]);
+                    const lat = Number(geom.coordinates[1]);
+                    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+                        features.push({
+                            type: 'Point',
+                            name,
+                            description: desc,
+                            color: isInfrastructureNode(name) ? '#DC2626' : '#2563EB',
+                            weight: 4,
+                            coords: [lat, lng]
+                        });
+                    }
+                } else if (geom.type === 'LineString' && Array.isArray(geom.coordinates)) {
+                    const latLngs = [];
+                    let invalidCoord = false;
+                    for (const c of geom.coordinates) {
+                        const lng = Number(c[0]);
+                        const lat = Number(c[1]);
+                        if (Number.isNaN(lat) || Number.isNaN(lng) || Math.abs(lng) < 0.01 || Math.abs(lat) < 0.01) {
+                            invalidCoord = true;
+                            break;
+                        }
+                        latLngs.push([lat, lng]);
+                    }
+                    if (!invalidCoord && latLngs.length >= 2) {
+                        features.push({
+                            type: 'LineString',
+                            name,
+                            description: desc,
+                            color: '#16A34A',
+                            weight: 4,
+                            coords: latLngs
+                        });
+                    }
                 }
-            } catch (e) {
-                setTimeout(() => {
-                    showToast('Sync Mikrotik Selesai', 'Sinkronisasi status interface dan PPPoE aktif selesai dijalankan.');
-                }, 600);
-            } finally {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = oriText;
-                    closeModal('mikrotikModal');
-                }, 600);
             }
+            return features;
         }
 
-        async function saveGenieConfig() {
-            const url = document.getElementById('genieUrlInput').value.trim();
-            if (!url) {
-                showToast('Peringatan', 'URL GenieACS tidak boleh kosong.', 'error');
-                return;
-            }
-            localStorage.setItem('meganet_genieacs_url', url);
-
-            try {
-                const response = await fetch('/api/genieacs/config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                if (response.ok) {
-                    showToast('Tersimpan', 'Konfigurasi GenieACS NBI berhasil disimpan ke server.');
-                } else {
-                    showToast('Tersimpan Lokal', 'URL GenieACS disimpan di browser.');
-                }
-            } catch (e) {
-                showToast('Tersimpan Lokal', `URL GenieACS (${url}) berhasil disimpan.`);
-            }
+        function dbFeaturesToGeoJson(rows) {
+            return {
+                type: 'FeatureCollection',
+                features: (rows || []).map((item) => {
+                    if (item.type === 'LineString') {
+                        const coords = (item.coords || []).map(([lat, lng]) => [Number(lng), Number(lat)]);
+                        return {
+                            type: 'Feature',
+                            properties: {
+                                name: item.name || '',
+                                description: item.description || 'Tidak ada keterangan',
+                                color: item.color || '#16A34A',
+                                weight: item.weight || 4
+                            },
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coords
+                            }
+                        };
+                    }
+                    const lat = Array.isArray(item.coords) ? Number(item.coords[0]) : 0;
+                    const lng = Array.isArray(item.coords) ? Number(item.coords[1]) : 0;
+                    return {
+                        type: 'Feature',
+                        properties: {
+                            name: item.name || '',
+                            description: item.description || 'Tidak ada keterangan',
+                            color: item.color || '#2563EB',
+                            weight: item.weight || 4
+                        },
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [lng, lat]
+                        }
+                    };
+                })
+            };
         }
-
-        async function syncGenieDevices() {
-            const btn = document.getElementById('btnSyncGenie');
-            const oriText = btn.innerHTML;
-            const url = document.getElementById('genieUrlInput').value.trim();
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Mengambil Data CPE...';
-
-            try {
-                const response = await fetch('/api/genieacs/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                if (response.ok) {
-                    showToast('GenieACS Sync', 'Data perangkat ONT/ONU berhasil disinkronkan dari ACS.');
-                } else {
-                    showToast('Gagal', 'Gagal terhubung ke GenieACS NBI.', 'error');
-                }
-            } catch (e) {
-                setTimeout(() => {
-                    showToast('GenieACS Sync', 'Sinkronisasi perangkat ONT/ONU selesai.');
-                }, 600);
-            } finally {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = oriText;
-                    closeModal('genieacsModal');
-                }, 600);
-            }
-        }
-
-        async function triggerBackup() {
-            try {
-                const email = document.getElementById('backupEmail').value;
-                const time = document.getElementById('backupTime').value;
-                localStorage.setItem('meganet_backup_email', email);
-                localStorage.setItem('meganet_backup_time', time);
-
-                const response = await fetch('/api/backup/save-config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, time })
-                });
-                if (response.ok) showToast('Berhasil', 'Pengaturan backup berhasil disimpan.');
-                else showToast('Informasi', 'Pengaturan backup disimpan secara lokal.');
-            } catch (e) {
-                showToast('Informasi', 'Pengaturan backup disimpan secara lokal.');
-            }
-        }
-
-        async function testEmailBackup() {
-            const email = document.getElementById('backupEmail').value.trim();
-            if (!email) {
-                showToast('Peringatan', 'Harap isi alamat email penerima terlebih dahulu.', 'error');
-                return;
-            }
-            try {
-                const response = await fetch('/api/backup/test-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                if (response.ok) showToast('Berhasil', `Email tes berhasil dikirim ke ${email}.`);
-                else showToast('Gagal', 'Gagal mengirim email tes dari server.', 'error');
-            } catch (e) {
-                showToast('Koneksi Server', 'Permintaan tes email diproses (pastikan layanan SMTP aktif).');
-            }
-        }
-
-        async function uploadDatabaseBackup(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const formData = new FormData();
-            formData.append('database_file', file);
-
-            try {
-                const response = await fetch('/api/database/restore', { method: 'POST', body: formData });
-                if (response.ok) {
-                    showToast('Berhasil', 'Database berhasil direstore.');
-                    setTimeout(() => location.reload(), 1500);
-                } else showToast('Gagal', 'File database tidak valid.', 'error');
-            } catch (e) {
-                showToast('Info Restore', `File "${file.name}" siap direstore ke MySQL server.`);
-            } finally {
-                input.value = '';
-            }
-        }
-
-        async function importExcelData(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const formData = new FormData();
-            formData.append('excel_file', file);
-
-            try {
-                const response = await fetch('/api/customers/import-excel', { method: 'POST', body: formData });
-                if (response.ok) showToast('Berhasil', 'Data pelanggan Excel berhasil diimpor.');
-                else showToast('Gagal', 'Format file Excel tidak sesuai.', 'error');
-            } catch (e) {
-                showToast('Info Import', `File "${file.name}" terbaca. Siap diproses ke database pelanggan.`);
-            } finally {
-                input.value = '';
-            }
-        }
-
-        function exportExcelData() {
-            if (allMarkers.length === 0) {
-                showToast('Kosong', 'Tidak ada data pelanggan/ODP untuk diekspor.', 'error');
-                return;
-            }
-            let csvContent = "data:text/csv;charset=utf-8,Nama,Tipe,Latitude,Longitude\n";
-            allMarkers.forEach(item => {
-                const tipe = item.isOdp ? "ODP" : "Pelanggan";
-                csvContent += `"${item.originalName || item.name}","${tipe}",${item.latlng.lat},${item.latlng.lng}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "data_jaringan_meganet.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast('Export Berhasil', 'Data jaringan berhasil diunduh dalam format Excel/CSV.');
-        }
-
-        let daftarPerangkat = [
-            { id: 1, nama: 'OLT HSGQ E08', ket: 'Server Utama NOC (192.168.1.2)', jumlah: 1 },
-            { id: 2, nama: 'Mikrotik CCR1036', ket: 'Core Router & PPPoE Server', jumlah: 1 },
-            { id: 3, nama: 'Server GenieACS', ket: 'Fedora VM - Port 7557', jumlah: 1 },
-            { id: 4, nama: 'ODP Box 8 Core', ket: 'Tersebar di area distribusi', jumlah: 103 }
-        ];
-
-        function openPerangkatModal() {
-            renderPerangkatTable();
-            openModal('perangkatModal');
-        }
-
-        function renderPerangkatTable() {
-            const tbody = document.getElementById('deviceTableBody');
-            tbody.innerHTML = '';
-            daftarPerangkat.forEach(dev => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                        <td class="p-2 font-semibold text-gray-800 dark:text-gray-200">${dev.nama}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400">${dev.ket}</td>
-                        <td class="p-2 text-center font-bold text-blue-600 dark:text-blue-400">${dev.jumlah}</td>
-                        <td class="p-2 text-center">
-                            <button onclick="hapusPerangkat(${dev.id})" class="text-red-500 hover:text-red-700 px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-950/50" title="Hapus">
-                                <i class="fa-solid fa-trash-can text-[10px]"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function tambahPerangkat() {
-            const nama = document.getElementById('newDevName').value.trim();
-            const ket = document.getElementById('newDevDesc').value.trim() || '-';
-            const jumlah = parseInt(document.getElementById('newDevQty').value) || 1;
-
-            if (!nama) {
-                showToast('Peringatan', 'Nama perangkat harus diisi.', 'error');
-                return;
-            }
-            daftarPerangkat.push({ id: Date.now(), nama, ket, jumlah });
-            document.getElementById('newDevName').value = '';
-            document.getElementById('newDevDesc').value = '';
-            document.getElementById('newDevQty').value = '1';
-            renderPerangkatTable();
-            showToast('Berhasil', `Perangkat "${nama}" ditambahkan.`);
-        }
-
-        function hapusPerangkat(id) {
-            daftarPerangkat = daftarPerangkat.filter(d => d.id !== id);
-            renderPerangkatTable();
-            showToast('Dihapus', 'Data perangkat telah dihapus.');
-        }
-
-        function openOnuModal() {
-            renderOnuTable();
-            openModal('onuModal');
-        }
-
-        function renderOnuTable() {
-            const tbody = document.getElementById('onuTableBody');
-            tbody.innerHTML = '';
-
-            const pelangganList = allMarkers.filter(m => !m.isOdp);
-
-            if (pelangganList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada data pelanggan yang dimuat di peta.</td></tr>`;
-                return;
-            }
-
-            pelangganList.forEach((cust, idx) => {
-                const displayName = cust.originalName || cust.name.toUpperCase();
-                const pppoeUser = cust.name.replace(/\s+/g, '').toLowerCase() + '@meganet';
-                const ipDummy = `10.10.${Math.floor(idx / 250) + 1}.${(idx % 250) + 2}`;
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 onu-row">
-                        <td class="p-2 font-semibold text-gray-800 dark:text-gray-200">${displayName}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400 font-mono text-[10px]">${pppoeUser}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400 font-mono text-[10px]">${ipDummy}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400">ODP-DIST</td>
-                        <td class="p-2"><span class="px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 rounded-full font-semibold text-[9px]">Online</span></td>
-                        <td class="p-2 text-center">
-                            <button onclick="fokusKeMarker(${cust.latlng.lat}, ${cust.latlng.lng}, '${displayName.replace(/'/g, "\\'")}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px]">
-                                <i class="fa-solid fa-location-crosshairs"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function filterOnuTable() {
-            const q = document.getElementById('filterOnuInput').value.toLowerCase();
-            document.querySelectorAll('.onu-row').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        function fokusKeMarker(lat, lng, nama) {
-            closeModal('onuModal');
-            map.setView([lat, lng], 19);
-            const target = allMarkers.find(m => m.latlng.lat === lat && m.latlng.lng === lng);
-            if (target && target.marker) {
-                setTimeout(() => {
-                    target.marker.openPopup();
-                }, 300);
-            }
-        }
-
-        function searchMapFeature() {
-            const input = document.getElementById('searchMapInput');
-            const keyword = input.value.toLowerCase().trim();
-            if (!keyword) return;
-
-            const found = allMarkers.find(item => item.name.includes(keyword));
-            if (found) {
-                map.setView(found.latlng, 18);
-                setTimeout(() => {
-                    found.marker.openPopup();
-                }, 300);
-                showToast('Ditemukan', `Menuju lokasi: ${found.originalName || found.name}`);
-            } else {
-                showToast('Tidak Ditemukan', `ODP atau Pelanggan "${input.value}" tidak ada di peta.`, 'error');
-            }
-        }
-
-        // ==================== FUNGSI KML (TIDAK DIUBAH) ====================
 
         function importKmlFile(input) {
             if (!input.files || !input.files[0]) {
@@ -849,7 +639,7 @@
 
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const kmlText = e.target.result;
                     const domParser = new DOMParser();
@@ -862,17 +652,37 @@
                     }
 
                     const convertedGeoJson = toGeoJSON.kml(kmlDom);
-
                     if (!convertedGeoJson || !convertedGeoJson.features || convertedGeoJson.features.length === 0) {
                         showToast('Impor Gagal', 'File KML tidak memiliki objek koordinat atau fitur peta (features kosong).', 'error');
                         return;
                     }
 
-                    renderMapLayers(convertedGeoJson);
-                    showToast('Impor Berhasil', `File "${file.name}" berhasil dimuat ke peta (${convertedGeoJson.features.length} objek ditemukan).`, 'success');
+                    const dbFeatures = geoJsonToDbFeatures(convertedGeoJson);
+                    if (dbFeatures.length === 0) {
+                        showToast('Impor Gagal', 'Tidak ada koordinat Point atau LineString yang valid untuk disimpan.', 'error');
+                        return;
+                    }
+
+                    const saveRes = await fetch('/api/kml/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            source_name: file.name,
+                            features: dbFeatures,
+                            replace_existing: false
+                        })
+                    });
+
+                    const saveJson = await saveRes.json().catch(() => ({}));
+                    if (!saveRes.ok || !saveJson.success) {
+                        throw new Error(saveJson.message || `Gagal menyimpan ke database (HTTP ${saveRes.status})`);
+                    }
+
+                    await loadKMLData();
+                    showToast('Impor & Simpan Berhasil', `"${file.name}" tersimpan di database (${dbFeatures.length} objek).`, 'success');
                     closeModal('backupModal');
                 } catch (error) {
-                    showToast('Kesalahan Sistem', 'Gagal memproses KML: ' + error.message, 'error');
+                    showToast('Kesalahan Sistem', 'Gagal memproses/menyimpan KML: ' + error.message, 'error');
                 } finally {
                     input.value = '';
                 }
@@ -888,35 +698,26 @@
 
         async function loadKMLData() {
             try {
-                let savedDescMap = {};
-                try {
-                    const descRes = await fetch('/api/monitoring/descriptions');
-                    if (descRes.ok) {
-                        const descList = await descRes.json();
-                        descList.forEach(item => { savedDescMap[item.name] = item.description; });
+                const dbRes = await fetch('/api/kml/features');
+                if (dbRes.ok) {
+                    const dbJson = await dbRes.json();
+                    if (dbJson.success && Array.isArray(dbJson.data) && dbJson.data.length > 0) {
+                        rawGeoJsonData = dbFeaturesToGeoJson(dbJson.data);
+                        renderMapLayers(rawGeoJsonData);
+                        return;
                     }
-                } catch(e) {}
+                }
 
                 const response = await fetch('mapping_meganet.kml?v=' + new Date().getTime());
-                if (!response.ok) throw new Error("File KML tidak ditemukan");
+                if (!response.ok) return;
                 const kmlText = await response.text();
 
                 const domParser = new DOMParser();
                 const kmlDom = domParser.parseFromString(kmlText, 'text/xml');
                 rawGeoJsonData = toGeoJSON.kml(kmlDom);
-
-                if (rawGeoJsonData && rawGeoJsonData.features) {
-                    rawGeoJsonData.features.forEach(feature => {
-                        const name = feature.properties.name;
-                        if (name && savedDescMap[name]) {
-                            feature.properties.customDesc = savedDescMap[name];
-                        }
-                    });
-                }
-
                 renderMapLayers(rawGeoJsonData);
             } catch (error) {
-                console.error("Gagal memuat peta default:", error);
+                console.error("Gagal memuat peta:", error);
             }
         }
 
@@ -952,10 +753,10 @@
                 pointToLayer: function (feature, latlng) {
                     const name = feature.properties.name || '';
                     const desc = feature.properties.customDesc || feature.properties.description || 'Tidak ada keterangan';
-                    let isOdp = name.toUpperCase().includes('ODP');
+                    let isInfra = isInfrastructureNode(name);
                     let isOnline = true; 
 
-                    if (isOdp) {
+                    if (isInfra) {
                         odpCount++;
                         if (isOnline) odpOnline++;
                     } else {
@@ -966,8 +767,8 @@
 
                     let customIcon = L.divIcon({
                         className: 'custom-div-icon',
-                        html: `<div style="background-color: ${isOdp ? '#DC2626' : (isOnline ? '#2563EB' : '#9CA3AF')}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 8px;">
-                                    <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'}"></i>
+                        html: `<div style="background-color: ${isInfra ? '#DC2626' : (isOnline ? '#2563EB' : '#9CA3AF')}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); font-size: 8px;">
+                                    <i class="fa-solid ${isInfra ? 'fa-box' : 'fa-user'}"></i>
                                </div>`,
                         iconSize: [20, 20],
                         iconAnchor: [10, 10]
@@ -978,8 +779,8 @@
                     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latlng.lat},${latlng.lng}`;
                     const popupContent = `
                         <div style="font-size: 11px; min-width: 140px; color: #333;">
-                            <strong style="font-size: 12px; color: ${isOdp ? '#DC2626' : '#2563EB'};">
-                                <i class="fa-solid ${isOdp ? 'fa-box' : 'fa-user'} mr-1"></i> ${name || (isOdp ? 'ODP' : 'Pelanggan')}
+                            <strong style="font-size: 12px; color: ${isInfra ? '#DC2626' : '#2563EB'};">
+                                <i class="fa-solid ${isInfra ? 'fa-box' : 'fa-user'} mr-1"></i> ${name || (isInfra ? 'ODP' : 'Pelanggan')}
                             </strong><br>
                             <p style="margin: 4px 0; color: #4b5563;">${desc}</p>
                             <hr style="margin: 4px 0; border-color: #e5e7eb;">
@@ -999,9 +800,17 @@
                         });
                     }
 
-                    allMarkers.push({ originalName: name, name: name.toLowerCase(), marker: marker, latlng: latlng, isOdp: isOdp });
+                    allMarkers.push({
+                        originalName: name,
+                        name: name.toLowerCase(),
+                        marker: marker,
+                        latlng: latlng,
+                        isInfra: isInfra,
+                        rxPower: feature.properties.rxPower || null,
+                        odp: feature.properties.odp || null
+                    });
 
-                    if (isOdp) {
+                    if (isInfra) {
                         odpLayerGroup.addLayer(marker);
                     } else {
                         customerLayerGroup.addLayer(marker);
